@@ -13,7 +13,7 @@ Built for **Arkiv: Global Tour Stop** (9 to 18 October 2026). Tracks: **Security
 **Censorship Resistance**.
 
 - **Live app:** _add your deployment URL_
-- **Writer wallet (creates Stet's run and fact entities on Tiramisu):** _add the address `npm run arkiv:check` prints_
+- **Writer wallet (creates Stet's run and fact entities on Tiramisu):** [`0x441aB97848BB539187D93EF3eF7125D1FbABbf27`](https://tiramisu.explorer.arkiv.network/address/0x441aB97848BB539187D93EF3eF7125D1FbABbf27)
 - **Schema:** [arkiv/schema.md](arkiv/schema.md) · **Friction report:** [arkiv/friction.md](arkiv/friction.md)
 
 ## Why this pillar?
