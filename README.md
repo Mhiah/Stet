@@ -77,10 +77,10 @@ API keys and secrets, personal data, the PDF, and SERV/Tavily request logs. See
 | --- | --- |
 | **Entities with JSON payloads** | One `run` entity holds the whole brief as canonical JSON. One `fact` entity per verified fact, so facts can be queried across briefs. |
 | **Typed attributes** | `bytes32` for `content_sha256`, `key` to link each fact to its run, `u64` timestamp, `i32` fact count, strings for everything Stet filters on. |
-| **Queries** | Reopen a brief by `run_id`, list runs, list a brief's revisions by `lineage`, list challenges by `run_id`. Runs are filtered to Stet's writer wallet so nobody can publish a fake brief under a real id; challenges deliberately aren't. |
+| **Queries with `$creator`** | Reopen a brief by `run_id`, list runs, list a brief's revisions by `lineage`, all with `$creator = <writer>` in the query. The creator can never change (the owner can be transferred), so nobody can slip in a fake brief under a real id. Challenges are found by `run_id` and deliberately not filtered by creator. |
 | **`readonly` creation flag** | Every Stet entity is immutable. This is what makes "can't be quietly rewritten" true at the data layer, not a promise. |
-| **`permissionlessExtension` flag** | Anyone can keep a brief alive past its expiry without being able to change it. |
-| **Owner addresses** | Challenges from other wallets are marked as independent in the UI. |
+| **`permissionlessExtension` flag + `extendEntity`** | Anyone can keep a brief and its facts alive with `npm run extend` (one `executeBatch` of extensions from their own wallet), without being able to change them. |
+| **Creator addresses** | Challenges whose `$creator` differs from the brief's are marked as independent wallets in the app and the reader. |
 | **`executeBatch`** | All of a brief's facts are written in one transaction. |
 | **Expiry** | Briefs live `ARKIV_TTL_DAYS` (default 365), extendable by anyone. |
 
@@ -111,6 +111,14 @@ CHALLENGER_PRIVATE_KEY=0x… npm run challenge -- \
 
 Use a funded Tiramisu testnet wallet and public or synthetic information only.
 
+### Keep a brief alive
+
+```bash
+KEEPER_PRIVATE_KEY=0x… npm run extend -- --run <run id> --days 90
+```
+
+Extends the brief and its facts from your own wallet. You can't change them, only keep them on Arkiv longer.
+
 ## Run it locally
 
 Node.js 22 or newer.
@@ -136,7 +144,7 @@ npm run dev                  # http://localhost:3000
 **Network:** Tiramisu, chain ID `7738577`, RPC `https://rpc.tiramisu.db-chain.testnet.arkiv.network`,
 explorer [tiramisu.explorer.arkiv.network](https://tiramisu.explorer.arkiv.network).
 
-Other commands: `npm test` (unit tests, including the Arkiv layer against an in-memory stand-in),
+Other commands: `npm test` (89 unit tests, including the Arkiv layer against an in-memory stand-in),
 `npm run typecheck`, `npm run lint`, `npm run build`.
 
 ### Deploy on Vercel
@@ -165,6 +173,7 @@ src/app/runs, src/app/verify    Runs list and tamper check
 src/app/api/                    research (POST, streams), runs, verify, record, challenges, status
 public/reader.html              Standalone reader: reads and verifies briefs straight from Arkiv
 scripts/challenge.ts            File a challenge from your own wallet
+scripts/extend.ts               Keep a brief alive from your own wallet
 scripts/arkiv-check.ts          Live round trip on Tiramisu
 arkiv/schema.md, arkiv/friction.md
 ```
