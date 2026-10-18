@@ -79,8 +79,11 @@ API keys and secrets, personal data, the PDF, and SERV/Tavily request logs. See
 | **Typed attributes** | `bytes32` for `content_sha256`, `key` to link each fact to its run, `u64` timestamp, `i32` fact count, strings for everything Stet filters on. |
 | **Queries with `$creator`** | Reopen a brief by `run_id`, list runs, list a brief's revisions by `lineage`, all with `$creator = <writer>` in the query. The creator can never change (the owner can be transferred), so nobody can slip in a fake brief under a real id. Challenges are found by `run_id` and deliberately not filtered by creator. |
 | **`readonly` creation flag** | Every Stet entity is immutable. This is what makes "can't be quietly rewritten" true at the data layer, not a promise. |
-| **`permissionlessExtension` flag + `extendEntity`** | Anyone can keep a brief and its facts alive with `npm run extend` (one `executeBatch` of extensions from their own wallet), without being able to change them. |
+| **`permissionlessExtension` flag + `extendEntity`** | Anyone can keep a brief and its facts alive with **Keep alive +90 days** on the brief page (signed by their own browser wallet) or `npm run extend`: one `executeBatch` of extensions. They can't change anything, only keep it on Arkiv longer. |
 | **Creator addresses** | Challenges whose `$creator` differs from the brief's are marked as independent wallets in the app and the reader. |
+| **Writes from the visitor's wallet** | **File a challenge** on the brief page creates the challenge entity with the visitor's own browser wallet (MetaMask on Tiramisu), so it's theirs on Arkiv, not Stet's. Stet never holds their key. |
+| **`watchEntityEvents`** | The brief page watches Arkiv's entity events: a new challenge appears, and an extension updates the brief's "Lives on Arkiv until" date, without a reload. |
+| **Hash checked in the browser** | The brief page downloads the exact stored record and hashes it with Web Crypto, so the "Hash intact" badge is computed on the visitor's machine, not asserted by Stet's server. |
 | **`executeBatch`** | All of a brief's facts are written in one transaction. |
 | **Expiry** | Briefs live `ARKIV_TTL_DAYS` (default 365), extendable by anyone. |
 
@@ -94,8 +97,9 @@ Reading needs no key: `/research/:id`, `/runs` and `/verify` read straight from 
    stored brief still matches it.
 3. **Download record**, change one word in it, and paste it into **Verify a copy**. Stet names the
    field you changed.
-4. File a challenge from your own wallet (below) and reload the brief: it appears with your address,
-   marked as an independent wallet.
+4. Connect your wallet on the brief page and choose **File a challenge**. It appears within seconds
+   (no reload), under your address, marked as an independent wallet. **Keep alive +90 days** extends the
+   brief from your wallet and its "Lives on Arkiv until" date moves.
 5. **Re-run as a revision**: a new brief is recorded and linked; the original stays exactly as it was.
 6. Open `reader.html` from your own computer (download it from the repo) and read the same brief
    straight from Arkiv, with no Stet server involved.

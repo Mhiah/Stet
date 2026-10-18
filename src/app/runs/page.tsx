@@ -37,7 +37,7 @@ export default async function RunsPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-5xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
+      <main className="stet-rise mx-auto w-full max-w-5xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
         <Eyebrow>Read from Arkiv</Eyebrow>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Recorded briefs</h1>
@@ -70,7 +70,7 @@ export default async function RunsPage() {
               <span>Stress test</span>
               <span>Recorded (UTC)</span>
             </div>
-            <ul className="divide-y divide-line">
+            <ul className="stet-stagger divide-y divide-line">
               {runs.map((r) => (
                 <li key={r.key}>
                   <Link

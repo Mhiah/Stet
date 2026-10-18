@@ -118,10 +118,10 @@ export default function Home() {
     return (
       <AppShell onHome={newQuestion}>
         <main className="mx-auto grid w-full max-w-6xl flex-1 content-center items-center gap-x-12 gap-y-8 px-5 py-8 sm:px-10 lg:grid-cols-[1.15fr_0.85fr] lg:py-6">
-          <div>
+          <div className="stet-rise">
             <Eyebrow>Verifiable research · Recorded on Arkiv</Eyebrow>
             <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-5xl xl:text-[3.5rem]">
-              Research briefs that can&apos;t be quietly <span className="text-muted/70">rewritten or removed.</span>
+              Research briefs that can&apos;t be quietly <span className="stet-mark text-muted/70">rewritten or removed.</span>
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted sm:text-lg">
               Stet forms a thesis, stress tests it against the evidence, and records the whole brief on Arkiv, where
@@ -184,13 +184,13 @@ export default function Home() {
 
           <ExampleCard />
 
-          <ol className="grid gap-3 sm:grid-cols-3 lg:col-span-2">
+          <ol className="stet-stagger grid gap-3 sm:grid-cols-3 lg:col-span-2">
             {[
               ["01", "Stress tested", "A first answer, then the strongest case against it, and every assumption re-judged."],
               ["02", "Recorded, read-only", "The whole brief goes to Arkiv. Nobody can edit it afterwards, Stet included."],
               ["03", "Open to challenge", "Anyone can verify a copy, keep the brief alive, or file a counter-claim from their own wallet."],
             ].map(([n, t, d]) => (
-              <li key={n} className="rounded-2xl border border-line bg-surface px-5 py-4">
+              <li key={n} className="stet-lift rounded-2xl border border-line bg-surface px-5 py-4">
                 <p className="font-mono text-xs text-sage">{n}</p>
                 <p className="mt-2 font-semibold">{t}</p>
                 <p className="mt-1 text-sm text-muted">{d}</p>
@@ -224,10 +224,10 @@ export default function Home() {
         {project && !running && saved && project.status === "complete" && (
           <Link
             href={`/research/${project.id}`}
-            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-line bg-brand px-4 py-3 text-sm text-brand-ink transition hover:bg-brand/90 print:hidden"
+            className="stet-pop mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-line bg-brand px-4 py-3 text-sm text-brand-ink transition hover:bg-brand/90 print:hidden"
           >
             <span className="flex items-center gap-2 font-medium">
-              <span className="h-2 w-2 rounded-full bg-mint" aria-hidden />
+              <span className="stet-pulse h-2 w-2 rounded-full bg-mint" aria-hidden />
               {project.arkiv ? "Recorded on Arkiv" : "Saved report"}
             </span>
             <span className="min-w-0 truncate font-mono text-xs text-brand-muted">
@@ -256,9 +256,9 @@ export default function Home() {
 /** An illustration of a recorded brief, beside the question box. Labelled as an example. */
 function ExampleCard() {
   return (
-    <div aria-hidden className="relative hidden lg:block">
+    <div aria-hidden className="stet-rise stet-delay-2 relative hidden lg:block">
       <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-mint-soft" />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_24px_48px_-24px_rgb(7_11_7/0.25)]">
+      <div className="stet-float rounded-2xl border border-line bg-surface p-5 shadow-[0_24px_48px_-24px_rgb(7_11_7/0.25)]">
         <div className="flex items-center justify-between">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Example brief</p>
           <span className="flex items-center gap-1.5 rounded-full bg-mint-soft px-2 py-0.5 text-xs font-medium text-good">

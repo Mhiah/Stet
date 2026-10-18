@@ -19,7 +19,7 @@ export default async function ResearchPage(props: PageProps<"/research/[id]">) {
 
   return (
     <AppShell>
-      <main className="mx-auto w-full max-w-4xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
+      <main className="stet-rise mx-auto w-full max-w-4xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
         <Eyebrow>{project.arkiv?.supersedes ? "Revised brief" : "Research brief"}</Eyebrow>
         <h1 className="mt-3 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl print:hidden">{project.question}</h1>
         <p className="mt-1 text-sm text-muted print:hidden">

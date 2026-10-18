@@ -43,7 +43,7 @@ export function VerifyForm({ initialRun = "" }: { initialRun?: string }) {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-3xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
+      <main className="stet-rise mx-auto w-full max-w-3xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
         <Eyebrow>Tamper check</Eyebrow>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Verify a brief</h1>
         <p className="mt-2 text-sm text-muted">
@@ -93,10 +93,10 @@ export function VerifyForm({ initialRun = "" }: { initialRun?: string }) {
 
         {error && <p className="mt-6 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
 
-        {result && !result.found && <p className="mt-6 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">No Stet run with that id or key on Arkiv.</p>}
+        {result && !result.found && <p className="stet-pop mt-6 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">No Stet run with that id or key on Arkiv.</p>}
 
         {result && result.found && (
-          <section className="mt-6 space-y-3 rounded-2xl border border-line bg-surface p-5 text-sm">
+          <section className="stet-pop stet-stagger mt-6 space-y-3 rounded-2xl border border-line bg-surface p-5 text-sm">
             <Row ok={result.chain_intact} yes="The brief on Arkiv matches its recorded hash." no="The brief on Arkiv does not match its recorded hash." />
             <Row ok={result.readonly} yes="It is read-only: its content can never be edited, only kept alive longer." no="It is not read-only." />
             {result.copy && (
