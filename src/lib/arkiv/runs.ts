@@ -23,7 +23,12 @@ import {
  */
 
 const DAYS = Number(process.env.ARKIV_TTL_DAYS || 365);
-const s = (v: string): TypedAttr => ({ t: "str", v: v.slice(0, 120) });
+/** A string attribute, cut to Arkiv's 128-byte limit by bytes (not characters) so UTF-8 can't overflow it. */
+const s = (v: string): TypedAttr => {
+  const bytes = new TextEncoder().encode(v);
+  if (bytes.length <= 128) return { t: "str", v };
+  return { t: "str", v: new TextDecoder().decode(bytes.slice(0, 128)).replace(/\uFFFD+$/, "") };
+};
 
 const decode = (e: StoredEntity) => JSON.parse(new TextDecoder().decode(e.payload));
 const str = (v: unknown) => (typeof v === "string" ? v : null);
