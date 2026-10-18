@@ -49,10 +49,10 @@ export function AppShell({ children, onHome, actions }: { children: ReactNode; o
     <div className="flex min-h-dvh w-full flex-col lg:flex-row">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col bg-brand px-4 py-6 text-brand-ink lg:flex print:hidden">
-        <Link href="/" className="px-3 text-mint" aria-label="Stet home" onClick={onHome}>
-          <Wordmark className="text-4xl" />
+        <Link href="/" className="px-2 text-mint" aria-label="Stet home" onClick={onHome}>
+          <Wordmark className="text-[4.5rem]" />
         </Link>
-        <nav className="mt-10 flex flex-col gap-1">{NAV.map((n) => navItem(n))}</nav>
+        <nav className="mt-8 flex flex-col gap-1">{NAV.map((n) => navItem(n))}</nav>
         <div className="mt-auto space-y-3 px-3">
           <div className="rounded-xl bg-white/5 p-3 text-xs leading-relaxed text-brand-muted">
             <p className="flex items-center gap-2 font-medium text-brand-ink">
@@ -66,9 +66,9 @@ export function AppShell({ children, onHome, actions }: { children: ReactNode; o
       </aside>
 
       {/* Phone and tablet bar */}
-      <header className="sticky top-0 z-30 flex items-center gap-2 bg-brand px-4 py-3 text-brand-ink lg:hidden print:hidden">
+      <header className="sticky top-0 z-30 flex items-center gap-2 bg-brand px-4 py-2 text-brand-ink lg:hidden print:hidden">
         <Link href="/" className="text-mint" aria-label="Stet home" onClick={onHome}>
-          <Wordmark className="text-2xl" />
+          <Wordmark className="text-[2.6rem]" />
         </Link>
         <nav className="ml-auto flex items-center gap-0.5">{NAV.map((n) => navItem(n, true))}</nav>
         <ThemeToggle className="text-brand-muted hover:bg-white/10 hover:text-brand-ink" />
