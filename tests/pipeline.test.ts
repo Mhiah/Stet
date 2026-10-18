@@ -7,7 +7,7 @@ import { runResearch } from "../src/lib/pipeline";
 import type { ReasoningProvider, ReasonRequest } from "../src/lib/reasoning/provider";
 import type { PipelineEvent } from "../src/lib/types";
 
-process.env.CRUX_MOCK_DELAY_MS = "0";
+process.env.STET_MOCK_DELAY_MS = "0";
 const QUESTION = "Should we launch an AI bookkeeping SaaS for Nigerian SMEs?";
 
 /** Mock reasoning with per-step overrides. */

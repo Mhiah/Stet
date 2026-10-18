@@ -3,16 +3,22 @@ import { MockReasoning, MockSearch } from "@/lib/mock/providers";
 import { getProviders } from "@/lib/providers";
 import { saveProject, storageAvailable } from "@/lib/store";
 
-// A full run makes six SERV calls plus searches; allow well over the default limit.
+// A full run makes six SERV calls plus searches, then two Arkiv transactions; allow well over the default limit.
 export const maxDuration = 300;
 
-/** Runs the pipeline and streams PipelineEvents as NDJSON, one event per line. */
+const UUID = /^[0-9a-f-]{36}$/;
+
+/**
+ * Runs the pipeline and streams PipelineEvents as NDJSON, one event per line. The finished run
+ * is written to Arkiv. `supersedes` makes it a revision of an earlier run instead of an edit.
+ */
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => null)) as { question?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { question?: unknown; supersedes?: unknown } | null;
   const question = typeof body?.question === "string" ? body.question.trim() : "";
   if (question.length < 10 || question.length > 500) {
     return Response.json({ error: "Ask a research question between 10 and 500 characters." }, { status: 400 });
   }
+  const supersedes = typeof body?.supersedes === "string" && UUID.test(body.supersedes) ? body.supersedes : null;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -20,7 +26,7 @@ export async function POST(req: Request) {
       try {
         await runResearch(question, {
           ...getProviders(),
-          save: storageAvailable ? saveProject : undefined,
+          save: storageAvailable() ? (p) => saveProject(p, { supersedes }) : undefined,
           fallback: { reasoning: new MockReasoning(), search: new MockSearch() },
           onEvent: (event) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n")),
         });

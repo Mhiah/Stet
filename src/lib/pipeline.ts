@@ -131,14 +131,16 @@ export async function runResearch(question: string, deps: PipelineDeps): Promise
 
   // A report that can't be saved is still delivered: it streams to the page and downloads as a PDF.
   let saved = false;
+  let saveError: string | undefined;
   if (save) {
     try {
       await save(project);
       saved = true;
     } catch (err) {
+      saveError = err instanceof Error ? err.message : String(err);
       console.error(`Couldn't save project ${project.id}:`, err);
     }
   }
-  onEvent({ type: "done", project, saved });
+  onEvent({ type: "done", project, saved, ...(saveError ? { save_error: saveError } : {}) });
   return project;
 }

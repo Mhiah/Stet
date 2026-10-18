@@ -2,9 +2,9 @@ import type { ReasoningProvider, ReasonRequest, ReasonResult } from "../reasonin
 import type { SearchProvider, SearchResult } from "../research/search";
 import { MOCK_OUTPUTS, MOCK_SEARCH_RESULTS } from "./fixtures";
 
-/** Simulated latency so the streaming UI behaves as it will live. CRUX_MOCK_DELAY_MS=0 in tests. */
+/** Simulated latency so the streaming UI behaves as it will live. STET_MOCK_DELAY_MS=0 in tests. */
 const delay = () => {
-  const ms = Number(process.env.CRUX_MOCK_DELAY_MS ?? 600);
+  const ms = Number(process.env.STET_MOCK_DELAY_MS ?? 600);
   return ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve();
 };
 

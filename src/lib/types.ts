@@ -183,6 +183,35 @@ export type ResearchProject = {
   error: string | null;
   /** Why a mock run is on sample data, when it fell back from a live run that ran out of credits. */
   notice?: string;
+  /** Where this run lives on Arkiv. Set after saving or loading; never part of the hashed record. */
+  arkiv?: ArkivRef;
+};
+
+/** A run's place on Arkiv, as the UI shows it. */
+export type ArkivRef = {
+  key: `0x${string}`;
+  owner: `0x${string}` | null;
+  tx: `0x${string}` | null;
+  content_sha256: `0x${string}`;
+  /** Whether the stored payload still hashes to its recorded content_sha256. */
+  intact: boolean;
+  readonly: boolean;
+  supersedes: string | null;
+  lineage: string;
+  expires_at_block: string | null;
+  explorer_url: string;
+};
+
+/** A counter-claim anyone can attach to a run from their own wallet. */
+export type RunChallenge = {
+  key: `0x${string}`;
+  owner: `0x${string}` | null;
+  run_id: string;
+  target: string;
+  text: string;
+  evidence_url: string | null;
+  /** True when the challenge was not written by the wallet that wrote the run. */
+  independent: boolean;
 };
 
 /** Events streamed to the client as NDJSON while the pipeline runs. */
@@ -194,4 +223,4 @@ export type PipelineEvent =
   /** A live service ran out of credits; the run restarts on sample data. */
   | { type: "fallback"; message: string }
   /** `saved`: the run can be reopened at /research/:id (false where there is no storage, e.g. Vercel). */
-  | { type: "done"; project: ResearchProject; saved: boolean };
+  | { type: "done"; project: ResearchProject; saved: boolean; save_error?: string };
