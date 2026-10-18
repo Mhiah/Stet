@@ -169,9 +169,6 @@ export default function Home() {
                 Run and record <span aria-hidden>→</span>
               </button>
             </form>
-            <p className="mt-3 text-sm text-muted">
-              Press <kbd className="rounded border border-line bg-surface px-1.5 font-mono text-xs">→</kbd> to try the example question.
-            </p>
 
             {revising && (
               <p className="mt-4 rounded-lg bg-info-soft px-3 py-2 text-sm text-info">
