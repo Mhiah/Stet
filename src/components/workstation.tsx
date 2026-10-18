@@ -209,7 +209,7 @@ const slug = (s: string) =>
 
 /** Nothing is stored for anyone: the report leaves the page as a PDF. */
 function Downloads({ project }: { project: ResearchProject }) {
-  const filename = `crux-${slug(project.question)}-${project.created_at.slice(0, 10)}`;
+  const filename = `stet-${slug(project.question)}-${project.created_at.slice(0, 10)}`;
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -258,7 +258,7 @@ function Downloads({ project }: { project: ResearchProject }) {
 function PrintHeader({ project }: { project: ResearchProject }) {
   return (
     <header className="mb-8 hidden print:block">
-      <p className="text-sm font-semibold">Crux research report</p>
+      <p className="text-sm font-semibold">Stet research brief</p>
       <h1 className="mt-1 text-2xl font-semibold leading-snug">{project.question}</h1>
       <p className="mt-1 text-sm text-muted">
         {new Date(project.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" })} UTC

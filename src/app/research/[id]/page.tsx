@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArkivPanel } from "@/components/arkiv-panel";
 import { HomeButton } from "@/components/home-button";
 import { SiteHeader } from "@/components/site-header";
 import { Workstation } from "@/components/workstation";
 import { loadProject } from "@/lib/store";
 
-/** A saved run, reopened from disk. Invalid or unknown IDs are a 404. */
+/** A run, reopened from Arkiv. Invalid or unknown IDs are a 404. */
 const load = (id: string) => loadProject(id).catch(() => null);
 
 export async function generateMetadata(props: PageProps<"/research/[id]">): Promise<Metadata> {
   const project = await load((await props.params).id);
-  return { title: project ? `${project.question} · Crux` : "Not found · Crux" };
+  return { title: project ? `${project.question} · Stet` : "Not found · Stet" };
 }
 
 export default async function ResearchPage(props: PageProps<"/research/[id]">) {
@@ -29,6 +30,9 @@ export default async function ResearchPage(props: PageProps<"/research/[id]">) {
         {project.status === "failed" && (
           <p className="mt-4 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">This run failed: {project.error}</p>
         )}
+        <div className="mt-6">
+          <ArkivPanel project={project} />
+        </div>
         <div className="mt-8">
           <Workstation project={project} />
         </div>

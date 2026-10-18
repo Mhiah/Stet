@@ -114,13 +114,13 @@ export function ReportDocument({ project }: { project: ResearchProject }) {
   const { thesis: t, stress_test: st, reevaluation: re, conclusion: c, what_changed: wc, research: r } = project;
   const assumptionText = (id: string) => plain(t?.assumptions.find((a) => a.id === id)?.text ?? "");
   const sourceNumber = new Map(r?.sources.map((src, i) => [src.id, i + 1]));
-  const footer = <Footer question={project.question} />;
+  const footer = <Footer question={project.question} arkiv={project.arkiv} />;
 
   return (
-    <Document title={`Crux: ${project.question}`} author="Crux" subject="Research report">
+    <Document title={`Stet: ${project.question}`} author="Stet" subject="Research report">
       <Page size="A4" style={s.page}>
         {footer}
-        <Text style={s.eyebrow}>Crux research report</Text>
+        <Text style={s.eyebrow}>Stet research brief</Text>
         <Text style={s.title}>{project.question}</Text>
         <Text style={s.meta}>
           {date(project.created_at)}
@@ -305,10 +305,18 @@ export function ReportDocument({ project }: { project: ResearchProject }) {
 }
 
 /** On every page. (No page numbers: react-pdf's dynamic `render` text doesn't draw here.) */
-function Footer({ question }: { question: string }) {
+function Footer({ question, arkiv }: { question: string; arkiv?: ResearchProject["arkiv"] }) {
+  // A printed brief carries its Arkiv entity and hash, so a paper copy can be checked against the chain.
+  if (arkiv) {
+    return (
+      <Text style={s.footer} fixed>
+        Stet · Arkiv (Tiramisu) entity {arkiv.key} · content sha256 {arkiv.content_sha256.slice(0, 18)}…
+      </Text>
+    );
+  }
   return (
     <Text style={s.footer} fixed>
-      Crux · {question.length > 90 ? `${question.slice(0, 87)}…` : question}
+      Stet · {question.length > 90 ? `${question.slice(0, 87)}…` : question}
     </Text>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HomeButton } from "@/components/home-button";
 import { SiteHeader } from "@/components/site-header";
 import { Progress, STAGES, Workstation } from "@/components/workstation";
@@ -23,9 +23,25 @@ export default function Home() {
   const [mode, setMode] = useState<"live" | "mock" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   // Tapping the empty box fills the demo question once; after that a tap just edits.
   const tapFilled = useRef(false);
+  // Set when re-running an earlier run as a revision (/?revise=<run id>). The original stays on Arkiv unchanged.
+  const [revising, setRevising] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("revise");
+    if (!id || !/^[0-9a-f-]{36}$/.test(id)) return;
+    fetch(`/api/research/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p: ResearchProject | null) => {
+        if (!p) return;
+        setQuestion(p.question);
+        setRevising(id);
+      })
+      .catch(() => {});
+  }, []);
 
   function handle(event: PipelineEvent) {
     if (event.type === "project") {
@@ -40,6 +56,7 @@ export default function Home() {
     if (event.type === "done") {
       setProject(event.project);
       setSaved(event.saved);
+      setSaveError(event.save_error ?? null);
       setActive(null);
     }
   }
@@ -50,12 +67,13 @@ export default function Home() {
     setError(null);
     setMode(null);
     setSaved(false);
+    setSaveError(null);
     setNotice(null);
     try {
       const res = await fetch("/api/research", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify(revising ? { question, supersedes: revising } : { question }),
       });
       if (!res.ok || !res.body) {
         setError(((await res.json().catch(() => null)) as { error?: string } | null)?.error ?? `Request failed (${res.status}).`);
@@ -83,6 +101,7 @@ export default function Home() {
   const tooShort = question.trim().length < 10;
 
   function newQuestion() {
+    setRevising(null);
     setProject(null);
     setError(null);
     setMode(null);
@@ -99,17 +118,18 @@ export default function Home() {
     </SiteHeader>
   );
 
-  // Landing: the name, what Crux does, and the question box.
+  // Landing: the name, what Stet does, and the question box.
   if (!running && !project) {
     return (
       <>
         {header}
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-5 pt-10 pb-24 sm:pt-16">
           <h1 className="text-center text-4xl font-semibold leading-[1.1] tracking-tight text-balance sm:text-6xl">
-            AI research that stress tests its own conclusions.
+            Research briefs that can&apos;t be quietly rewritten or removed.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-center text-lg text-muted text-balance">
-            Using SERV Reasoning, Crux forms a thesis, stress tests it against the evidence and audits it.
+            Stet forms a thesis, stress tests it against the evidence, and publishes the whole brief to Arkiv, where
+            anyone can verify it, keep it alive or challenge it.
           </p>
 
           <form
@@ -147,10 +167,19 @@ export default function Home() {
               maxLength={500}
             />
             <button className="rounded-xl bg-foreground px-5 py-3 font-medium text-background transition disabled:opacity-40" disabled={tooShort}>
-              Find the crux
+              Research and publish
             </button>
           </form>
 
+          {revising && (
+            <p className="mt-4 rounded-lg bg-info-soft px-3 py-2 text-sm text-info">
+              Re-running as a revision of an earlier run. The earlier run stays on Arkiv exactly as it was; this one is
+              published beside it and linked to it.{" "}
+              <button type="button" className="underline underline-offset-2" onClick={() => setRevising(null)}>
+                Make it a new run instead
+              </button>
+            </p>
+          )}
           {error && <p className="mt-4 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
         </main>
       </>
@@ -179,9 +208,19 @@ export default function Home() {
         {project && !running && saved && project.status === "complete" && (
           <p className="mt-4 text-sm print:hidden">
             <Link href={`/research/${project.id}`} className="text-info underline underline-offset-2">
-              Saved report
+              {project.arkiv ? "Published to Arkiv" : "Saved report"}
             </Link>{" "}
-            <span className="text-muted">(reopen or share this run later)</span>
+            <span className="text-muted">
+              {project.arkiv
+                ? `· entity ${project.arkiv.key.slice(0, 10)}… · read-only, anyone can verify or challenge it`
+                : "(saved locally for development; not on Arkiv)"}
+            </span>
+          </p>
+        )}
+        {project && !running && !saved && project.status === "complete" && (
+          <p className="mt-4 rounded-lg bg-warn-soft px-3 py-2 text-sm text-warn print:hidden">
+            Not published to Arkiv{saveError ? `: ${saveError}` : " (this deployment has no ARKIV_PRIVATE_KEY)"}. The report below
+            still downloads as a PDF.
           </p>
         )}
 

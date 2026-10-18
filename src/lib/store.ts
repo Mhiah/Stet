@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { SdkBackend, type ArkivBackend } from "./arkiv/backend";
+import { MemoryBackend, SdkBackend, type ArkivBackend } from "./arkiv/backend";
 import { loadRun, saveRun } from "./arkiv/runs";
 import type { ResearchProject } from "./types";
 
@@ -14,7 +14,14 @@ import type { ResearchProject } from "./types";
 
 let backend: ArkivBackend | null = null;
 export function arkiv(): ArkivBackend {
-  backend ??= new SdkBackend(process.env.ARKIV_PRIVATE_KEY);
+  if (backend) return backend;
+  if (process.env.STET_ARKIV_MEMORY === "1") {
+    // Offline stand-in for the chain (development and UI checks only), shared across route modules.
+    const g = globalThis as { __stetMemoryArkiv?: MemoryBackend };
+    backend = g.__stetMemoryArkiv ??= new MemoryBackend();
+  } else {
+    backend = new SdkBackend(process.env.ARKIV_PRIVATE_KEY);
+  }
   return backend;
 }
 /** Swaps the backend (tests). */
