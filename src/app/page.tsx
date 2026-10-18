@@ -128,7 +128,7 @@ export default function Home() {
             Research briefs that can&apos;t be quietly rewritten or removed.
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-center text-lg text-muted text-balance">
-            Stet forms a thesis, stress tests it against the evidence, and publishes the whole brief to Arkiv, where
+            Stet forms a thesis, stress tests it against the evidence, and records the whole brief on Arkiv, where
             anyone can verify it, keep it alive or challenge it.
           </p>
 
@@ -167,14 +167,14 @@ export default function Home() {
               maxLength={500}
             />
             <button className="rounded-xl bg-foreground px-5 py-3 font-medium text-background transition disabled:opacity-40" disabled={tooShort}>
-              Research and publish
+              Run and record
             </button>
           </form>
 
           {revising && (
             <p className="mt-4 rounded-lg bg-info-soft px-3 py-2 text-sm text-info">
               Re-running as a revision of an earlier run. The earlier run stays on Arkiv exactly as it was; this one is
-              published beside it and linked to it.{" "}
+              recorded beside it and linked to it.{" "}
               <button type="button" className="underline underline-offset-2" onClick={() => setRevising(null)}>
                 Make it a new run instead
               </button>
@@ -208,7 +208,7 @@ export default function Home() {
         {project && !running && saved && project.status === "complete" && (
           <p className="mt-4 text-sm print:hidden">
             <Link href={`/research/${project.id}`} className="text-info underline underline-offset-2">
-              {project.arkiv ? "Published to Arkiv" : "Saved report"}
+              {project.arkiv ? "Recorded on Arkiv" : "Saved report"}
             </Link>{" "}
             <span className="text-muted">
               {project.arkiv
@@ -219,7 +219,7 @@ export default function Home() {
         )}
         {project && !running && !saved && project.status === "complete" && (
           <p className="mt-4 rounded-lg bg-warn-soft px-3 py-2 text-sm text-warn print:hidden">
-            Not published to Arkiv{saveError ? `: ${saveError}` : " (this deployment has no ARKIV_PRIVATE_KEY)"}. The report below
+            Not recorded on Arkiv{saveError ? `: ${saveError}` : " (this deployment has no ARKIV_PRIVATE_KEY)"}. The report below
             still downloads as a PDF.
           </p>
         )}

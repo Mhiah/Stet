@@ -3,9 +3,9 @@
 **Research briefs that can't be quietly rewritten or removed.**
 
 In proofreading, *stet* means "let it stand". Stet is an AI research engine that forms a thesis on a
-market or strategy question, stress tests it against the evidence, and publishes the whole brief to
+market or strategy question, stress tests it against the evidence, and records the whole brief on
 [Arkiv](https://arkiv.network): every fact with the exact source words it rests on, the challenges,
-the verdicts, and what changed. Once published, the brief can't be edited by anyone, including Stet.
+the verdicts, and what changed. Once recorded, the brief can't be edited by anyone, including Stet.
 Anyone can verify a copy against it, keep it alive, or file a challenge against it from their own
 wallet.
 
@@ -67,9 +67,9 @@ Reading needs no key: `/research/:id`, `/runs` and `/verify` read straight from 
 
 ## Try it
 
-1. Ask a question (press → to fill in the demo question) and choose **Research and publish**. The
-   brief fills in stage by stage, then is published to Arkiv.
-2. Open **Published to Arkiv**. The **On Arkiv** panel shows the entity, its hash and whether the
+1. Ask a question (press → to fill in the demo question) and choose **Run and record**. The
+   brief fills in stage by stage, then is recorded on Arkiv.
+2. Open **Recorded on Arkiv**. The **On Arkiv** panel shows the entity, its hash and whether the
    stored brief still matches it.
 3. **Download record**, change one word in it, and paste it into **Verify a copy**. Stet names the
    field you changed.
