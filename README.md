@@ -12,26 +12,47 @@ wallet.
 Built for **Arkiv: Global Tour Stop** (9 to 18 October 2026). Tracks: **Security** and
 **Censorship Resistance**.
 
-- **Live app:** _add your deployment URL_
+- **Live app:** [stet.myacxt.site](https://stet.myacxt.site)
+- **Standalone reader (no Stet server):** [stet.myacxt.site/reader.html](https://stet.myacxt.site/reader.html), or save [`public/reader.html`](public/reader.html) and open it locally
 - **Writer wallet (creates Stet's run and fact entities on Tiramisu):** [`0x441aB97848BB539187D93EF3eF7125D1FbABbf27`](https://tiramisu.explorer.arkiv.network/address/0x441aB97848BB539187D93EF3eF7125D1FbABbf27)
 - **Schema:** [arkiv/schema.md](arkiv/schema.md) · **Friction report:** [arkiv/friction.md](arkiv/friction.md)
 
 ## Why this pillar?
 
-**Security: who is harmed if this data is forged?** Research briefs drive decisions: whether to fund
-a project, enter a market, back a governance proposal. A brief passed around as a PDF or a database
-row can be edited after the fact: a confidence quietly raised, a damaging fact removed, a quote
-reworded. The reader who acts on the edited copy is harmed, and so is the analyst whose name is on
-it. Stet makes every published brief checkable: its SHA-256 is recorded on Arkiv beside a read-only
-copy, and `/verify` names exactly which fields of a copy were changed.
+**The people Stet protects: DAO members who vote on research they can't check.** Before a token
+vote on a treasury grant, a protocol upgrade or a risk parameter, delegates and analysts publish
+research: is this team delivering, does this treasury follow its spending plan, is this
+collateral safe. Thousands of holders vote on that research. Today it lives in a forum post, a
+Notion page or a PDF, and all three can be edited or removed without a trace.
 
-**Censorship resistance: who is harmed if it's taken down?** Scrutiny is what gets deleted first.
-A brief that weakens a project's claims, or a counter-claim against a brief, can disappear when the
-operator who hosts it is pressured, sold or shut down. On Stet, a brief survives without Stet: it
-lives on Arkiv as a read-only entity anyone can read and re-render, anyone can extend its life
-(`permissionlessExtension`), and challenges are written from the challenger's own wallet, so Stet
-has no way to remove them. Revisions never overwrite: they're new runs that point back to the
-original, which stays on Arkiv unchanged.
+**Security: who is harmed if a brief is forged?** A brief can be quietly edited after people have
+read it: a confidence raised, a damaging fact dropped, a quote reworded, the night before a vote.
+Holders who act on the edited copy are harmed, and so is the analyst whose name is on it. With
+Stet, every brief is a read-only entity on Arkiv with its SHA-256 recorded beside it. Nobody can
+change it afterwards, Stet included. Anyone can check a copy against the chain, and Stet names the
+exact field that was changed. A fake brief published under a real brief's id by another wallet is
+ignored.
+
+**Censorship resistance: who is harmed if it's taken down?** Inconvenient research is what gets
+removed first: a forum moderator deletes the post, a hosting provider is pressured, the analyst's
+own platform shuts down. So is dissent: a reply pointing out that "two of the cited votes were
+later reversed" disappears with the thread. With Stet:
+
+- **The brief survives Stet.** It lives on Arkiv, not on Stet's server, and
+  [`reader.html`](public/reader.html) is a single file with no server and no libraries that reads
+  any brief straight from Arkiv and checks its hash. Save it, host it anywhere, or open it from your
+  own computer. If stet.myacxt.site goes dark, briefs are still readable.
+- **Anyone can keep it alive.** Briefs are created with `permissionlessExtension`, so any holder
+  can extend a brief's life on Arkiv without being able to change it.
+- **Dissent can't be deleted.** Challenges are written from the challenger's own wallet and found
+  by run id, not by owner. Stet has no key that can remove them, and both the app and the reader
+  show every one.
+- **Corrections don't erase the record.** A revision is a new brief that points back to the
+  original, which stays on Arkiv exactly as it was.
+
+What Arkiv proves, and what it doesn't: it proves a brief hasn't changed since it was recorded and
+who recorded it. It doesn't prove the research is right. That's what the stress test, the quote
+checks against each source, and open challenges are for.
 
 ## Why Arkiv?
 
@@ -75,7 +96,9 @@ Reading needs no key: `/research/:id`, `/runs` and `/verify` read straight from 
    field you changed.
 4. File a challenge from your own wallet (below) and reload the brief: it appears with your address,
    marked as an independent wallet.
-5. **Re-run as a revision**: a new brief is published and linked; the original stays exactly as it was.
+5. **Re-run as a revision**: a new brief is recorded and linked; the original stays exactly as it was.
+6. Open `reader.html` from your own computer (download it from the repo) and read the same brief
+   straight from Arkiv, with no Stet server involved.
 
 ### File a challenge
 
@@ -140,6 +163,7 @@ src/lib/store.ts                Arkiv as the app's store
 src/app/research/[id]/page.tsx  A brief, read from Arkiv, with the On Arkiv panel
 src/app/runs, src/app/verify    Runs list and tamper check
 src/app/api/                    research (POST, streams), runs, verify, record, challenges, status
+public/reader.html              Standalone reader: reads and verifies briefs straight from Arkiv
 scripts/challenge.ts            File a challenge from your own wallet
 scripts/arkiv-check.ts          Live round trip on Tiramisu
 arkiv/schema.md, arkiv/friction.md

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stet Reader · read a brief straight from Arkiv</title>
+<!--
+  Stet Reader. One self-contained file: no server, no libraries, no build step.
+  Save it anywhere and open it in a browser, or host it on any static site. It reads Stet briefs
+  straight from Arkiv over JSON-RPC (arkiv_query), checks each brief's SHA-256 against the
+  content_sha256 recorded with it, and shows every challenge filed against it from any wallet.
+  If Stet's website is shut down, this still works. MIT licensed, part of github.com/Mhiah/Stet.
+-->
+<style>
+  :root {
+    --bg: #f3f5f3; --fg: #070b07; --surface: #fff; --muted: #586458; --line: rgb(7 11 7 / .1);
+    --brand: #1e2e1f; --brand-ink: #e9f1e9; --brand-muted: #9db39d; --mint: #9eec9b; --mint-soft: #e3f6e2;
+    --good: #2f6b31; --good-soft: #dcf3db; --warn: #8a5a12; --warn-soft: #f6ead2; --bad: #a3271f; --bad-soft: #f7dfdc;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #070b07; --fg: #e6ece6; --surface: #0f1610; --muted: #93a093; --line: rgb(230 236 230 / .1);
+      --brand: #0c140c; --mint-soft: rgb(158 236 155 / .12);
+      --good: #9eec9b; --good-soft: rgb(158 236 155 / .13); --warn: #e8c27a; --warn-soft: rgb(232 194 122 / .13);
+      --bad: #f09a8f; --bad-soft: rgb(240 154 143 / .13); color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--brand); color: var(--brand-ink); padding: 18px 20px; }
+  header .in, main { max-width: 860px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 20px; display: flex; gap: 10px; align-items: center; }
+  header p { margin: 4px 0 0; color: var(--brand-muted); font-size: 14px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); display: inline-block; }
+  main { padding: 24px 20px 80px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-top: 16px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin: 10px 0 4px; }
+  input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: 14px ui-monospace, Menlo, Consolas, monospace; }
+  button { margin-top: 14px; padding: 10px 18px; border-radius: 12px; border: 0; background: var(--brand); color: var(--brand-ink); font: 600 15px system-ui, sans-serif; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { button { background: var(--mint); color: #070b07; } }
+  details summary { cursor: pointer; color: var(--muted); font-size: 14px; margin-top: 10px; }
+  .eyebrow { display: inline-block; background: var(--mint-soft); color: var(--good); font: 600 11px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+  h2 { margin: 10px 0 4px; font-size: 24px; line-height: 1.25; }
+  h3 { margin: 22px 0 8px; font-size: 16px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .mono { font: 12px ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; margin: 2px 4px 2px 0; }
+  .ok { background: var(--good-soft); color: var(--good); } .warn { background: var(--warn-soft); color: var(--warn); } .bad { background: var(--bad-soft); color: var(--bad); }
+  .row { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 14px; }
+  .row dt { color: var(--muted); }
+  ul.list { list-style: none; padding: 0; margin: 0; }
+  ul.list li { border-top: 1px solid var(--line); padding: 10px 0; }
+  blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--mint); color: var(--muted); font-size: 14px; }
+  a { color: inherit; }
+  .error { background: var(--bad-soft); color: var(--bad); border-radius: 10px; padding: 10px 12px; margin-top: 16px; font-size: 14px; }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1><span class="dot"></span> Stet Reader</h1>
+  <p>Reads Stet briefs straight from Arkiv. No Stet server involved, so it works even if Stet is shut down.</p>
+</div></header>
+<main>
+  <form id="f" class="card">
+    <label for="ref">Run id or Arkiv entity key <span class="muted">(leave empty to list recent briefs)</span></label>
+    <input id="ref" placeholder="e.g. 6030f283-… or 0x…" autocomplete="off" />
+    <details>
+      <summary>Network and writer</summary>
+      <label for="rpc">Arkiv RPC</label>
+      <input id="rpc" value="https://rpc.tiramisu.db-chain.testnet.arkiv.network" />
+      <label for="writer">Stet writer wallet <span class="muted">(only briefs from this wallet count; challenges are shown from every wallet)</span></label>
+      <input id="writer" value="0x441aB97848BB539187D93EF3eF7125D1FbABbf27" />
+    </details>
+    <button>Read from Arkiv</button>
+  </form>
+  <div id="out"></div>
+</main>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+// Everything shown comes from the chain and is untrusted: escape all of it.
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const strLit = (s) => `str('${String(s).replace(/'/g, "''")}')`;
+
+async function query(q, limit = 50) {
+  const res = await fetch($("rpc").value.trim(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0", id: 1, method: "arkiv_query",
+      params: [q, { select: { key: true, owner: true, payload: true, attributes: true, creationFlags: true, expiresAt: true }, limit: "0x" + limit.toString(16) }],
+    }),
+  });
+  const body = await res.json();
+  if (body.error) throw new Error(body.error.message || JSON.stringify(body.error));
+  return body.result.data.map((e) => ({
+    key: e.key,
+    owner: e.owner || null,
+    payloadHex: e.payload || "0x",
+    attrs: Object.fromEntries((e.attributes || []).map((a) => [a.name, a.value])),
+    readonly: typeof e.creationFlags === "object" ? !!e.creationFlags.readonly : (Number(e.creationFlags) & 1) === 1,
+    expiresAt: e.expiresAt ? BigInt(e.expiresAt).toString() : null,
+  }));
+}
+
+const hexToBytes = (h) => { const s = h.replace(/^0x/, ""); const b = new Uint8Array(s.length / 2); for (let i = 0; i < b.length; i++) b[i] = parseInt(s.substr(i * 2, 2), 16); return b; };
+async function sha256Hex(bytes) { const d = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)); return "0x" + [...d].map((x) => x.toString(16).padStart(2, "0")).join(""); }
+const decodeJson = (hex) => JSON.parse(new TextDecoder().decode(hexToBytes(hex)));
+const sameAddr = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
+const writer = () => $("writer").value.trim();
+const tone = (v) => (["high", "strengthened", "survived", "supported"].includes(v) ? "ok" : ["medium", "weakened", "unresolved"].includes(v) ? "warn" : "bad");
+
+async function listRecent() {
+  const runs = (await query(`app = ${strLit("stet")} AND kind = ${strLit("run")}`, 200)).filter((e) => !writer() || sameAddr(e.owner, writer()));
+  const rows = runs.map((e) => ({ e, r: decodeJson(e.payloadHex) })).sort((a, b) => String(b.r.created_at).localeCompare(String(a.r.created_at)));
+  $("out").innerHTML = `<div class="card"><span class="eyebrow">Read from Arkiv</span><h2>Recent briefs (${rows.length})</h2>
+    <ul class="list">${rows.map(({ e, r }) => `<li><a href="#${esc(r.id)}" data-run="${esc(r.id)}"><b>${esc(r.question)}</b></a><br>
+      <span class="pill ${tone(e.attrs.confidence)}">${esc(e.attrs.confidence)} confidence</span><span class="pill ${tone(e.attrs.verdict)}">thesis ${esc(e.attrs.verdict)}</span>
+      <span class="muted">${esc(new Date(r.created_at).toUTCString())}</span></li>`).join("")}</ul></div>`;
+  document.querySelectorAll("[data-run]").forEach((a) => a.addEventListener("click", (ev) => { ev.preventDefault(); $("ref").value = a.dataset.run; read(); }));
+}
+
+async function read() {
+  const ref = $("ref").value.trim();
+  $("out").innerHTML = `<p class="muted">Reading from Arkiv…</p>`;
+  try {
+    if (!ref) return await listRecent();
+    let found;
+    if (/^0x[0-9a-fA-F]{64}$/.test(ref)) found = await query(`$key = key(${ref.toLowerCase()})`, 1);
+    else if (/^[0-9a-f-]{36}$/.test(ref)) found = await query(`app = ${strLit("stet")} AND kind = ${strLit("run")} AND run_id = ${strLit(ref)}`, 10);
+    else throw new Error("That isn't a run id or an entity key.");
+    const e = found.filter((x) => x.attrs.kind === "run" && (!writer() || sameAddr(x.owner, writer())))[0];
+    if (!e) throw new Error("No Stet brief with that id or key from the writer wallet on this network.");
+
+    const bytes = hexToBytes(e.payloadHex);
+    const actual = await sha256Hex(bytes);
+    const recorded = String(e.attrs.content_sha256 || "").toLowerCase();
+    const intact = actual === recorded;
+    const r = JSON.parse(new TextDecoder().decode(bytes));
+    const challenges = (await query(`app = ${strLit("stet")} AND kind = ${strLit("challenge")} AND run_id = ${strLit(r.id)}`, 200)).map((c) => {
+      let b = {}; try { b = decodeJson(c.payloadHex); } catch {}
+      return { owner: c.owner, target: b.target || c.attrs.target, text: b.text, url: b.evidence_url, independent: !sameAddr(c.owner, e.owner) };
+    }).filter((c) => c.text);
+
+    const c = r.conclusion || {};
+    const wc = r.what_changed || {};
+    const claims = (r.research && r.research.claims) || [];
+    const sources = (r.research && r.research.sources) || [];
+    const src = (id) => sources.find((s) => s.id === id);
+
+    $("out").innerHTML = `
+      <div class="card">
+        <span class="eyebrow">${r.supersedes ? "Revised brief" : "Research brief"}</span>
+        <h2>${esc(r.question)}</h2>
+        <p class="muted">${esc(new Date(r.created_at).toUTCString())}${r.mode === "mock" ? " · sample research (illustrative data)" : ""}</p>
+        <p><span class="pill ${intact ? "ok" : "bad"}">${intact ? "Hash intact" : "Hash mismatch"}</span>
+           <span class="pill ${e.readonly ? "ok" : "bad"}">${e.readonly ? "Read-only" : "Not read-only"}</span></p>
+        <dl class="row">
+          <dt>Entity</dt><dd class="mono">${esc(e.key)}</dd>
+          <dt>Written by</dt><dd class="mono">${esc(e.owner)}</dd>
+          <dt>Recorded SHA-256</dt><dd class="mono">${esc(recorded)}</dd>
+          <dt>Computed here</dt><dd class="mono">${esc(actual)}</dd>
+          ${e.expiresAt ? `<dt>Expires at block</dt><dd class="mono">${esc(e.expiresAt)}</dd>` : ""}
+          ${r.supersedes ? `<dt>Revises</dt><dd class="mono"><a href="#" data-run="${esc(r.supersedes)}">${esc(r.supersedes)}</a></dd>` : ""}
+        </dl>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Answer</h3>
+        <p><span class="pill ${tone(c.confidence)}">${esc(c.confidence)} confidence</span>${wc.verdict ? `<span class="pill ${tone(wc.verdict)}">thesis ${esc(wc.verdict)} by the stress test</span>` : ""}</p>
+        <p style="font-size:18px">${esc(c.final_statement)}</p>
+        <p class="muted">${esc(c.confidence_rationale)}</p>
+        ${wc.initial ? `<h3>What changed</h3><p class="muted"><b>First answer:</b> ${esc(wc.initial.statement)}</p>
+          <ul class="list">${(wc.assumptions || []).map((a) => `<li><span class="pill ${tone(a.verdict)}">${esc(a.verdict)}</span> ${esc(a.text)}<br><span class="muted">${esc(a.reasoning)}</span></li>`).join("")}</ul>` : ""}
+        ${(c.uncertainties || []).length ? `<h3>Still uncertain</h3><ul>${c.uncertainties.map((u) => `<li>${esc(u)}</li>`).join("")}</ul>` : ""}
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Challenges (${challenges.length})</h3>
+        <p class="muted">Filed from any wallet. They live on Arkiv under the challenger's address, so Stet can't remove them.</p>
+        <ul class="list">${challenges.map((x) => `<li><span class="pill warn">${esc(x.target)}</span>${x.independent ? `<span class="pill ok">independent wallet</span>` : ""}
+          <span class="mono">${esc(x.owner)}</span><br>${esc(x.text)}${x.url && /^https?:\/\//.test(x.url) ? `<br><a href="${esc(x.url)}" rel="noreferrer nofollow" target="_blank" class="mono">${esc(x.url)}</a>` : ""}</li>`).join("") || "<li class='muted'>None filed yet.</li>"}</ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Evidence (${claims.length} facts)</h3>
+        <ul class="list">${claims.map((cl) => `<li><b>${esc(cl.id)}</b> <span class="pill ${cl.stance === "supports" ? "ok" : cl.stance === "challenges" ? "bad" : "warn"}">${esc(cl.stance)}</span> ${esc(cl.text)}
+          ${(cl.quotes || []).map((q) => { const s = src(q.source_id); return `<blockquote>&ldquo;${esc(q.text)}&rdquo;${s ? ` — <a href="${esc(/^https?:\/\//.test(s.url) ? s.url : "#")}" target="_blank" rel="noreferrer nofollow">${esc(s.publisher || s.title)}</a>` : ""}</blockquote>`; }).join("")}</li>`).join("")}</ul>
+      </div>`;
+    document.querySelectorAll("[data-run]").forEach((a) => a.addEventListener("click", (ev) => { ev.preventDefault(); $("ref").value = a.dataset.run; read(); }));
+  } catch (err) {
+    $("out").innerHTML = `<div class="error">${esc(err && err.message ? err.message : err)}</div>`;
+  }
+}
+
+$("f").addEventListener("submit", (ev) => { ev.preventDefault(); read(); });
+const fromHash = decodeURIComponent(location.hash.slice(1));
+if (fromHash) $("ref").value = fromHash;
+read();
+</script>
+</body>
+</html>
