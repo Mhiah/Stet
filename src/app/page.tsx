@@ -11,7 +11,7 @@ import type { PipelineEvent, ResearchProject, Stage } from "@/lib/types";
  * and so does tapping the empty box on a touchscreen.
  * Nothing runs, and no credits are spent, until the button is pressed.
  */
-const DEMO_QUESTION = "Are small businesses actually willing to accept crypto payments?";
+const DEMO_QUESTION = "Do DAO treasuries actually follow their published spending plans?";
 
 /** Ask a question and watch the report fill in stage by stage as the pipeline streams. */
 export default function Home() {
@@ -117,19 +117,19 @@ export default function Home() {
   if (!running && !project) {
     return (
       <AppShell onHome={newQuestion}>
-        <main className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-5 py-10 sm:px-10 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
+        <main className="mx-auto grid w-full max-w-6xl flex-1 content-center items-center gap-x-12 gap-y-8 px-5 py-8 sm:px-10 lg:grid-cols-[1.15fr_0.85fr] lg:py-6">
           <div>
             <Eyebrow>Verifiable research · Recorded on Arkiv</Eyebrow>
-            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
+            <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-5xl xl:text-[3.5rem]">
               Research briefs that can&apos;t be quietly <span className="text-muted/70">rewritten or removed.</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-muted">
+            <p className="mt-4 max-w-xl text-base text-muted sm:text-lg">
               Stet forms a thesis, stress tests it against the evidence, and records the whole brief on Arkiv, where
               anyone can verify it, keep it alive or challenge it.
             </p>
 
             <form
-              className="mt-8 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-2 shadow-[0_1px_0_rgb(7_11_7/0.04),0_12px_32px_-16px_rgb(7_11_7/0.18)] sm:flex-row"
+              className="mt-7 flex max-w-xl flex-col gap-1.5 rounded-xl border border-line bg-surface p-1.5 shadow-[0_1px_0_rgb(7_11_7/0.04),0_12px_32px_-16px_rgb(7_11_7/0.18)] sm:flex-row"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!tooShort) run();
@@ -138,7 +138,7 @@ export default function Home() {
               {/* A textarea so a long question wraps on phones instead of being cut off; Enter still submits. */}
               <textarea
                 rows={1}
-                className="min-w-0 flex-1 resize-none bg-transparent px-3 py-3 text-base leading-snug [field-sizing:content] placeholder:text-muted/60 focus:outline-none max-sm:min-h-[4.5rem]"
+                className="min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-snug [field-sizing:content] placeholder:text-muted/60 focus:outline-none max-sm:min-h-[3.5rem]"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onPointerDown={(e) => {
@@ -163,7 +163,7 @@ export default function Home() {
                 maxLength={500}
               />
               <button
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-medium text-primary-ink transition hover:opacity-90 disabled:opacity-40"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-ink transition hover:opacity-90 disabled:opacity-40"
                 disabled={tooShort}
               >
                 Run and record <span aria-hidden>→</span>
@@ -190,9 +190,9 @@ export default function Home() {
               ["02", "Recorded, read-only", "The whole brief goes to Arkiv. Nobody can edit it afterwards, Stet included."],
               ["03", "Open to challenge", "Anyone can verify a copy, keep the brief alive, or file a counter-claim from their own wallet."],
             ].map(([n, t, d]) => (
-              <li key={n} className="rounded-2xl border border-line bg-surface p-5">
+              <li key={n} className="rounded-2xl border border-line bg-surface px-5 py-4">
                 <p className="font-mono text-xs text-sage">{n}</p>
-                <p className="mt-3 font-semibold">{t}</p>
+                <p className="mt-2 font-semibold">{t}</p>
                 <p className="mt-1 text-sm text-muted">{d}</p>
               </li>
             ))}
