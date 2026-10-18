@@ -268,7 +268,7 @@ function ExampleCard() {
             <span className="h-1.5 w-1.5 rounded-full bg-good" /> Hash intact
           </span>
         </div>
-        <p className="mt-4 font-semibold leading-snug">Is there demand for AI bookkeeping among small retailers?</p>
+        <p className="mt-4 font-semibold leading-snug">Do DAO treasuries actually follow their published spending plans?</p>
         <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
           <span className="rounded-full bg-warn-soft px-2 py-0.5 text-warn">medium confidence</span>
           <span className="rounded-full bg-bad-soft px-2 py-0.5 text-bad">thesis weakened</span>
@@ -290,7 +290,7 @@ function ExampleCard() {
           <p className="flex items-center gap-2 font-medium">
             <span className="h-1.5 w-1.5 rounded-full bg-mint" /> Challenge filed · independent wallet
           </p>
-          <p className="mt-1 text-brand-muted">&ldquo;The adoption figure is from 2019, not 2025.&rdquo;</p>
+          <p className="mt-1 text-brand-muted">&ldquo;Two of the cited votes were later reversed on-chain.&rdquo;</p>
         </div>
       </div>
     </div>
