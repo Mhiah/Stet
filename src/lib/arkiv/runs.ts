@@ -106,18 +106,29 @@ export async function saveRun(
   };
 }
 
+/** The wallet that publishes Stet's briefs on Tiramisu. Override with STET_WRITER_ADDRESS. */
+export const STET_WRITER = "0x441aB97848BB539187D93EF3eF7125D1FbABbf27" as Hex;
+
+/**
+ * The address whose runs count as Stet's: STET_WRITER_ADDRESS if set, else this deployment's own
+ * writer, else Stet's publisher. Checked against $creator, which never changes, not the
+ * transferable owner.
+ */
+export function trustedWriter(backend: ArkivBackend): Hex {
+  return ((process.env.STET_WRITER_ADDRESS?.trim() || null) as Hex | null) ?? backend.writer ?? STET_WRITER;
+}
+
 async function findRunEntity(backend: ArkivBackend, runId: string) {
-  const found = await backend.find({ app: APP, kind: "run", run_id: runId }, 10);
-  // Only Stet's own writer may publish a run; anything else with the same id is ignored.
-  const own = backend.writer ? found.filter((e) => e.owner?.toLowerCase() === backend.writer!.toLowerCase()) : found;
-  return own[0] ?? null;
+  // Filtered by $creator in the query itself: a run with the same id written by anyone else is never returned.
+  const found = await backend.find({ app: APP, kind: "run", run_id: runId }, 10, { creator: trustedWriter(backend) });
+  return found[0] ?? null;
 }
 
 function refFor(e: StoredEntity, record: RunRecord): ArkivRef {
   const recorded = String(e.attributes.content_sha256 ?? "").toLowerCase();
   return {
     key: e.key,
-    owner: e.owner,
+    owner: e.creator ?? e.owner,
     tx: null,
     content_sha256: recorded as Hex,
     intact: sha256Hex(e.payload).toLowerCase() === recorded,
@@ -153,6 +164,8 @@ export async function loadRecordText(backend: ArkivBackend, runId: string): Prom
 export async function loadRunByKey(backend: ArkivBackend, key: Hex): Promise<ResearchProject | null> {
   const e = await backend.get(key);
   if (!e || e.attributes.kind !== "run") return null;
+  const writer = trustedWriter(backend);
+  if (e.creator?.toLowerCase() !== writer.toLowerCase()) return null;
   return toProject(e);
 }
 
@@ -171,8 +184,7 @@ export type RunSummary = {
 export async function listRuns(backend: ArkivBackend, opts: { lineage?: string; limit?: number } = {}): Promise<RunSummary[]> {
   const where: Record<string, string> = { app: APP, kind: "run" };
   if (opts.lineage) where.lineage = opts.lineage;
-  let found = await backend.find(where, 200);
-  if (backend.writer) found = found.filter((e) => e.owner?.toLowerCase() === backend.writer!.toLowerCase());
+  const found = await backend.find(where, 200, { creator: trustedWriter(backend) });
   return found
     .map((e) => {
       const r = decode(e) as RunRecord;
@@ -216,11 +228,13 @@ export async function verifyRun(
 ): Promise<VerifyResult> {
   const e = ref.key ? await backend.get(ref.key) : ref.runId ? await findRunEntity(backend, ref.runId) : null;
   if (!e || e.attributes.kind !== "run") return { found: false };
+  const writer = trustedWriter(backend);
+  if (e.creator?.toLowerCase() !== writer.toLowerCase()) return { found: false };
   const recorded = String(e.attributes.content_sha256 ?? "").toLowerCase();
   const result: VerifyResult = {
     found: true,
     key: e.key,
-    owner: e.owner,
+    owner: e.creator ?? e.owner,
     readonly: e.readonly,
     recorded_sha256: recorded,
     chain_intact: sha256Hex(e.payload).toLowerCase() === recorded,
@@ -237,7 +251,7 @@ export async function verifyRun(
 }
 
 /** Counter-claims on a run from any wallet. Stet lists them all; it has no way to delete them. */
-export async function listChallenges(backend: ArkivBackend, runId: string, runOwner: Hex | null): Promise<RunChallenge[]> {
+export async function listChallenges(backend: ArkivBackend, runId: string, runCreator: Hex | null): Promise<RunChallenge[]> {
   const found = await backend.find({ app: APP, kind: "challenge", run_id: runId }, 200);
   return found
     .map((e) => {
@@ -249,12 +263,12 @@ export async function listChallenges(backend: ArkivBackend, runId: string, runOw
       }
       return {
         key: e.key,
-        owner: e.owner,
+        owner: e.creator ?? e.owner,
         run_id: runId,
         target: str(body.target) ?? String(e.attributes.target ?? "brief"),
         text: (str(body.text) ?? "").slice(0, 2000),
         evidence_url: str(body.evidence_url),
-        independent: !runOwner || e.owner?.toLowerCase() !== runOwner.toLowerCase(),
+        independent: !runCreator || (e.creator ?? e.owner)?.toLowerCase() !== runCreator.toLowerCase(),
       };
     })
     .filter((c) => c.text);
@@ -277,4 +291,18 @@ export async function postChallenge(
     },
   ]);
   return { key: keys[0], txHash };
+}
+
+/**
+ * Extends a run and its facts on Arkiv. Signed by whoever holds the backend's key: any wallet can
+ * keep a Stet brief alive (permissionlessExtension) without being able to change it.
+ */
+export async function keepAlive(backend: ArkivBackend, runId: string, days: number, publisher: Hex = STET_WRITER) {
+  const runs = await backend.find({ app: APP, kind: "run", run_id: runId }, 10, { creator: publisher });
+  const run = runs[0];
+  if (!run) throw new Error(`No Stet run ${runId} from ${publisher} on Arkiv.`);
+  const facts = await backend.find({ app: APP, kind: "fact", run_id: runId }, 200, { creator: publisher });
+  const keys = [run.key, ...facts.map((f) => f.key)];
+  const { txHash } = await backend.extend(keys, days);
+  return { txHash, extended: keys.length };
 }

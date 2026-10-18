@@ -1,11 +1,14 @@
 # Stet on Arkiv: schema
 
 Network: **Tiramisu testnet**, chain ID `7738577`. SDK: `@arkiv-network/sdk` 0.8.1.
+Writer wallet (`$creator` of every run and fact): `0x441aB97848BB539187D93EF3eF7125D1FbABbf27`.
 Code: [`src/lib/arkiv/`](../src/lib/arkiv) (`record.ts` builds and hashes payloads, `runs.ts` reads and writes, `backend.ts` wraps the SDK).
 
 Stet writes three kinds of entity. Every one carries `app = "stet"` and a `kind`, so the whole data set can be rebuilt by anyone with one query, without Stet's server.
 
-All Stet entities are created with the creation flags **`readonly: true`** (payload and attributes can never change) and **`permissionlessExtension: true`** (anyone, not just the writer, can extend the expiry). Default lifetime: `ARKIV_TTL_DAYS`, 365 days.
+All Stet entities are created with the creation flags **`readonly: true`** (payload and attributes can never change) and **`permissionlessExtension: true`** (anyone, not just the writer, can extend the expiry; `npm run extend` does this from any wallet).
+
+**Expiration per type:** runs, facts and challenges are all created with `ExpirationTime.fromDays(ARKIV_TTL_DAYS)`, default **365 days**. A brief and its facts share one lifetime and are extended together. Challenges get the same lifetime so dissent doesn't expire before the brief it answers.
 
 ## 1. Run (`kind = "run"`)
 
@@ -68,10 +71,11 @@ A counter-claim against a run, written by **anyone from their own wallet** (`npm
 
 | Where | Query | Notes |
 | --- | --- | --- |
-| Reopen a run (`/research/:id`) | `app = "stet" && kind = "run" && run_id = <id>` | Results not owned by Stet's writer wallet are ignored, so nobody can publish a fake run under a real id |
-| Runs list (`/runs`) | `app = "stet" && kind = "run"` | Filtered to the writer wallet, sorted by `created_at` in the app (the query builder has no ordering) |
-| Revisions | `app = "stet" && kind = "run" && lineage = <id>` | |
-| Challenges | `app = "stet" && kind = "challenge" && run_id = <id>` | **Not** filtered by owner, on purpose |
+| Reopen a run (`/research/:id`) | `app = str('stet') AND kind = str('run') AND run_id = str(<id>) AND $creator = addr(<writer>)` | Trust is checked against `$creator`, which can never change, inside the query. A run with the same id written by anyone else is never returned, even if its ownership is later transferred to Stet's wallet |
+| Runs list (`/runs`) | `app = str('stet') AND kind = str('run') AND $creator = addr(<writer>)` | Sorted by `created_at` in the app (the query builder has no ordering) |
+| Revisions | `app = str('stet') AND kind = str('run') AND lineage = str(<id>) AND $creator = addr(<writer>)` | |
+| Keep alive (`npm run extend`) | the run and `kind = str('fact') AND run_id = str(<id>) AND $creator = addr(<writer>)` | Then one `executeBatch` of `extensions`, signed by any wallet |
+| Challenges | `app = str('stet') AND kind = str('challenge') AND run_id = str(<id>)` | **Not** filtered by creator, on purpose. Each is marked independent when its `$creator` differs from the run's |
 | Verify (`/verify`) | by `run_id` as above, or `getEntity(key)` | Recomputes SHA-256 of the payload and compares to `content_sha256`, then to the canonical hash of any copy given |
 
 ## Kept off Arkiv on purpose

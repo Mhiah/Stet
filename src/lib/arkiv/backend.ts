@@ -31,6 +31,8 @@ export type CreateItem = {
 export type StoredEntity = {
   key: Hex;
   owner: Hex | null;
+  /** Who created it. Unlike the owner, this can never change, so trust is checked against it. */
+  creator: Hex | null;
   payload: Uint8Array;
   attributes: Record<string, AttrValue>;
   readonly: boolean;
@@ -43,9 +45,11 @@ export interface ArkivBackend {
   readonly writer: Hex | null;
   /** Creates entities in one transaction. Created entities are read-only and anyone may extend them. */
   create(items: CreateItem[]): Promise<{ txHash: Hex; keys: Hex[] }>;
-  /** Entities whose string attributes equal every value given. */
-  find(where: Record<string, string>, limit?: number): Promise<StoredEntity[]>;
+  /** Entities whose string attributes equal every value given, optionally only those created by one address ($creator). */
+  find(where: Record<string, string>, limit?: number, opts?: { creator?: Hex | null }): Promise<StoredEntity[]>;
   get(key: Hex): Promise<StoredEntity | null>;
+  /** Extends entities' lifetime. Any wallet may do this for Stet entities (permissionlessExtension). */
+  extend(keys: Hex[], days: number): Promise<{ txHash: Hex }>;
 }
 
 export const EXPLORER = "https://tiramisu.explorer.arkiv.network";
@@ -70,6 +74,7 @@ const toSdkAttr = (a: TypedAttr) => {
 type SdkEntity = {
   key?: Hex;
   owner?: Hex;
+  creator?: Hex;
   payload?: Uint8Array;
   attributes?: Readonly<Record<string, { value: unknown }>>;
   creationFlags?: { readonly: boolean };
@@ -80,6 +85,7 @@ type SdkEntity = {
 const fromSdk = (e: SdkEntity): StoredEntity => ({
   key: e.key as Hex,
   owner: e.owner ?? null,
+  creator: e.creator ?? null,
   payload: e.payload ?? new Uint8Array(),
   attributes: Object.fromEntries(Object.entries(e.attributes ?? {}).map(([k, v]) => [k, v.value as AttrValue])),
   readonly: Boolean(e.creationFlags?.readonly),
@@ -118,14 +124,20 @@ export class SdkBackend implements ArkivBackend {
     return { txHash, keys: createdEntities };
   }
 
-  async find(where: Record<string, string>, limit = 50) {
+  async find(where: Record<string, string>, limit = 50, opts: { creator?: Hex | null } = {}) {
     const conds = Object.entries(where).map(([k, v]) => eq(k, v));
-    const res = await this.pub
-      .select()
-      .where(conds.length === 1 ? conds[0] : and(conds))
-      .limit(limit)
-      .fetch();
+    let q = this.pub.select().where(conds.length === 1 ? conds[0] : and(conds));
+    if (opts.creator) q = q.createdBy(opts.creator);
+    const res = await q.limit(limit).fetch();
     return res.entities.map((e) => fromSdk(e as SdkEntity));
+  }
+
+  async extend(keys: Hex[], days: number) {
+    if (!this.wallet) throw new Error("A private key is needed to send the extension transaction.");
+    const { txHash } = await this.wallet.executeBatch({
+      extensions: keys.map((entityKey) => ({ entityKey, expires: ExpirationTime.fromDays(days) })),
+    });
+    return { txHash };
   }
 
   async get(key: Hex) {
@@ -156,6 +168,7 @@ export class MemoryBackend implements ArkivBackend {
       this.entities.set(key, {
         key,
         owner,
+        creator: owner,
         payload: it.payload,
         attributes: Object.fromEntries(Object.entries(it.attributes).map(([k, v]) => [k, v.v])),
         readonly: true,
@@ -168,8 +181,19 @@ export class MemoryBackend implements ArkivBackend {
     return { txHash: `0x${"ab".repeat(32)}` as Hex, keys };
   }
 
-  async find(where: Record<string, string>, limit = 50) {
-    return [...this.entities.values()].filter((e) => Object.entries(where).every(([k, v]) => e.attributes[k] === v)).slice(0, limit);
+  async find(where: Record<string, string>, limit = 50, opts: { creator?: Hex | null } = {}) {
+    return [...this.entities.values()]
+      .filter((e) => Object.entries(where).every(([k, v]) => e.attributes[k] === v))
+      .filter((e) => !opts.creator || e.creator?.toLowerCase() === opts.creator.toLowerCase())
+      .slice(0, limit);
+  }
+
+  async extend(keys: Hex[], days: number) {
+    for (const k of keys) {
+      const e = this.entities.get(k);
+      if (e) this.entities.set(k, { ...e, expiresAt: (e.expiresAt ?? BigInt(0)) + BigInt(days * 43200) });
+    }
+    return { txHash: `0x${"cd".repeat(32)}` as Hex };
   }
 
   async get(key: Hex) {

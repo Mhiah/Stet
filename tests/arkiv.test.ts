@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { MemoryBackend } from "../src/lib/arkiv/backend";
 import { canonicalJson, encodeRecord, PAYLOAD_LIMIT, sha256Hex, toRunRecord } from "../src/lib/arkiv/record";
-import { listChallenges, listRuns, loadRecordText, loadRun, postChallenge, saveRun, verifyRun } from "../src/lib/arkiv/runs";
+import { keepAlive, listChallenges, listRuns, loadRecordText, loadRun, postChallenge, saveRun, verifyRun } from "../src/lib/arkiv/runs";
 import { MockReasoning, MockSearch } from "../src/lib/mock/providers";
 import { runResearch } from "../src/lib/pipeline";
 import type { ResearchProject } from "../src/lib/types";
@@ -117,5 +117,28 @@ describe("challenges", () => {
     expect(list.find((c) => c.target === "C2")).toMatchObject({ owner: challenger, independent: true });
     expect(list.find((c) => c.target === "conclusion")?.independent).toBe(false);
     await expect(postChallenge(chain, { runId: project.id, target: "C1", text: "short" })).rejects.toThrow(/10 to 2,000/);
+  });
+});
+
+describe("trust and keeping alive", () => {
+  it("trusts $creator, not the owner: a run transferred to Stet's writer still doesn't count", async () => {
+    const chain = new MemoryBackend();
+    const imposter = new MemoryBackend("0x000000000000000000000000000000000000bad0");
+    const fake = await saveRun(imposter, { ...project, question: "forged" });
+    const e = imposter.entities.get(fake.key)!;
+    // Ownership can be transferred; the creator can't. Pretend the forger handed it to Stet's wallet.
+    chain.entities.set(e.key, { ...e, owner: chain.writer });
+    expect(await loadRun(chain, project.id)).toBeNull();
+    expect((await verifyRun(chain, { key: e.key })).found).toBe(false);
+  });
+
+  it("lets any wallet extend a brief and its facts", async () => {
+    const chain = new MemoryBackend();
+    await saveRun(chain, project);
+    const run = (await chain.find({ app: "stet", kind: "run", run_id: project.id }))[0];
+    const before = run.expiresAt!;
+    const res = await keepAlive(chain, project.id, 30, chain.writer!);
+    expect(res.extended).toBe(1 + project.research!.claims.length);
+    expect(chain.entities.get(run.key)!.expiresAt! > before).toBe(true);
   });
 });

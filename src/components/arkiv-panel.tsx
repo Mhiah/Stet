@@ -144,12 +144,18 @@ export function ArkivPanel({ project }: { project: ResearchProject }) {
           </ul>
         )}
         <details className="mt-3 text-sm">
-          <summary className="cursor-pointer text-muted">How to file one</summary>
+          <summary className="cursor-pointer text-muted">How to file a challenge, or keep this brief alive</summary>
           <pre className="mt-2 overflow-x-auto rounded-lg bg-background p-3 font-mono text-xs">
             {`CHALLENGER_PRIVATE_KEY=0x… npm run challenge -- \\
   --run ${project.id} --target C1 \\
   --text "What this brief gets wrong, and why" \\
   --url https://link-to-your-evidence`}
+          </pre>
+          <p className="mt-3 text-muted">
+            Anyone can also extend this brief&apos;s life on Arkiv from their own wallet, without being able to change it:
+          </p>
+          <pre className="mt-2 overflow-x-auto rounded-lg bg-background p-3 font-mono text-xs">
+            {`KEEPER_PRIVATE_KEY=0x… npm run extend -- --run ${project.id} --days 90`}
           </pre>
         </details>
       </div>

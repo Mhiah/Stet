@@ -80,6 +80,25 @@ testnet or a hand-written stand-in. Stet puts the few calls it uses behind an in
 **Would help.** A published in-memory test client with the same `select`/`executeBatch`/`getEntity`
 surface, so projects can test their Arkiv logic in CI.
 
+## 8. Owner vs creator: which one to trust isn't in the README
+
+**Surface:** TypeScript SDK query builder, `@arkiv-network/sdk` 0.8.1.
+
+**Expected.** The README's query example uses `.ownedBy(address)`, so the first version of Stet
+trusted a run when its `owner` was Stet's wallet.
+
+**What happened.** Ownership is transferable (`changeOwnership`), so a forger could write a run
+under a real run id and later hand it to Stet's wallet, and it would pass an owner check. The fix
+is `$creator`, which never changes: `.createdBy(address)`, or `$creator = addr(0x…)` over raw
+JSON-RPC. This is only explained in the JSDoc on `createdBy` in `src/query/queryBuilder.ts` ("The
+creator never changes; the owner does").
+
+**Reproduce.** `grep -n "ownedBy\|createdBy" node_modules/@arkiv-network/sdk/README.md` finds only
+`ownedBy`.
+
+**Would help.** One README sentence: trust checks should filter on `$creator`, with a
+`createdBy` example beside `ownedBy`.
+
 ## What worked well
 
 - `executeBatch` made writing all of a run's facts one transaction.
@@ -87,4 +106,8 @@ surface, so projects can test their Arkiv logic in CI.
 - `select({...})` narrows result types to the selected fields, so reading a field you didn't
   select is a compile error rather than a silent `undefined`.
 - `permissionlessExtension` is exactly the primitive a censorship-resistant record needs: a third
-  party can keep a brief alive without being able to change it.
+  party can keep a brief alive without being able to change it (`npm run extend`, an
+  `executeBatch` of `extensions` from any wallet).
+- Direct JSON-RPC (`arkiv_query`) answers browser requests from any origin, so
+  `public/reader.html` reads and verifies briefs with plain `fetch` and no libraries. Tested on
+  18 October 2026 from the Tiramisu explorer's origin and from the Stet deployment.
