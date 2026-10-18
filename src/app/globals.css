@@ -5,65 +5,95 @@
  * data-theme on <html> (applied before first paint by the script in layout.tsx).
  */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --surface: #f7f7f6;
-  --muted: #6b6b6b;
-  --line: rgb(0 0 0 / 0.1);
+  --background: #f3f5f3;
+  --foreground: #070b07;
+  --surface: #ffffff;
+  --muted: #586458;
+  --line: rgb(7 11 7 / 0.1);
+
+  /* Brand: forest sidebar and mint highlights. */
+  --brand: #1e2e1f;
+  --brand-ink: #e9f1e9;
+  --brand-muted: #9db39d;
+  --mint: #9eec9b;
+  --mint-soft: #e3f6e2;
+  --sage: #628962;
+  --primary: #1e2e1f;
+  --primary-ink: #e9f1e9;
 
   /* Verdict colours: supported / weakened / contradicted, plus record kinds. */
-  --good: #15803d;
-  --good-soft: #dcfce7;
-  --warn: #a16207;
-  --warn-soft: #fef3c7;
-  --bad: #b91c1c;
-  --bad-soft: #fee2e2;
-  --info: #1d4ed8;
-  --info-soft: #dbeafe;
-  --accent: #6d28d9;
-  --accent-soft: #ede9fe;
+  --good: #2f6b31;
+  --good-soft: #dcf3db;
+  --warn: #8a5a12;
+  --warn-soft: #f6ead2;
+  --bad: #a3271f;
+  --bad-soft: #f7dfdc;
+  --info: #2f5d38;
+  --info-soft: #e1ece2;
+  --accent: #5d4d8a;
+  --accent-soft: #ebe7f5;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --surface: #151515;
-    --muted: #9a9a9a;
-    --line: rgb(255 255 255 / 0.12);
+    --background: #070b07;
+    --foreground: #e6ece6;
+    --surface: #0f1610;
+    --muted: #93a093;
+    --line: rgb(230 236 230 / 0.1);
 
-    --good: #4ade80;
-    --good-soft: rgb(74 222 128 / 0.14);
-    --warn: #fbbf24;
-    --warn-soft: rgb(251 191 36 / 0.14);
-    --bad: #f87171;
-    --bad-soft: rgb(248 113 113 / 0.14);
-    --info: #60a5fa;
-    --info-soft: rgb(96 165 250 / 0.14);
-    --accent: #a78bfa;
-    --accent-soft: rgb(167 139 250 / 0.16);
+    --brand: #0c140c;
+    --brand-ink: #e6ece6;
+    --brand-muted: #839583;
+    --mint: #9eec9b;
+    --mint-soft: rgb(158 236 155 / 0.12);
+    --sage: #8fbf8e;
+  --primary: #9eec9b;
+  --primary-ink: #070b07;
+    --primary: #9eec9b;
+    --primary-ink: #070b07;
+
+    --good: #9eec9b;
+    --good-soft: rgb(158 236 155 / 0.13);
+    --warn: #e8c27a;
+    --warn-soft: rgb(232 194 122 / 0.13);
+    --bad: #f09a8f;
+    --bad-soft: rgb(240 154 143 / 0.13);
+    --info: #a9d8a7;
+    --info-soft: rgb(169 216 167 / 0.12);
+    --accent: #b8a8ea;
+    --accent-soft: rgb(184 168 234 / 0.14);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --surface: #151515;
-  --muted: #9a9a9a;
-  --line: rgb(255 255 255 / 0.12);
+  --background: #070b07;
+  --foreground: #e6ece6;
+  --surface: #0f1610;
+  --muted: #93a093;
+  --line: rgb(230 236 230 / 0.1);
 
-  --good: #4ade80;
-  --good-soft: rgb(74 222 128 / 0.14);
-  --warn: #fbbf24;
-  --warn-soft: rgb(251 191 36 / 0.14);
-  --bad: #f87171;
-  --bad-soft: rgb(248 113 113 / 0.14);
-  --info: #60a5fa;
-  --info-soft: rgb(96 165 250 / 0.14);
-  --accent: #a78bfa;
-  --accent-soft: rgb(167 139 250 / 0.16);
+  --brand: #0c140c;
+  --brand-ink: #e6ece6;
+  --brand-muted: #839583;
+  --mint: #9eec9b;
+  --mint-soft: rgb(158 236 155 / 0.12);
+  --sage: #8fbf8e;
+  --primary: #9eec9b;
+  --primary-ink: #070b07;
+
+  --good: #9eec9b;
+  --good-soft: rgb(158 236 155 / 0.13);
+  --warn: #e8c27a;
+  --warn-soft: rgb(232 194 122 / 0.13);
+  --bad: #f09a8f;
+  --bad-soft: rgb(240 154 143 / 0.13);
+  --info: #a9d8a7;
+  --info-soft: rgb(169 216 167 / 0.12);
+  --accent: #b8a8ea;
+  --accent-soft: rgb(184 168 234 / 0.14);
   color-scheme: dark;
 }
 
@@ -83,6 +113,14 @@
   --color-info-soft: var(--info-soft);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-muted: var(--brand-muted);
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
+  --color-sage: var(--sage);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -97,9 +135,9 @@ body {
 @media print {
   :root {
     --background: #ffffff;
-    --foreground: #171717;
-    --surface: #f7f7f6;
-    --muted: #5b5b5b;
+    --foreground: #070b07;
+    --surface: #f3f5f3;
+    --muted: #586458;
     --line: rgb(0 0 0 / 0.14);
     --good: #15803d;
     --good-soft: #dcfce7;

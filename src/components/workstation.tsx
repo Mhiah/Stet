@@ -178,7 +178,7 @@ export function Workstation({ project, downloadable = true }: { project: Researc
                   aria-current={view === v.key ? "page" : undefined}
                   onClick={() => go(v.key)}
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition max-[359px]:px-2.5 sm:px-3.5 ${
-                    view === v.key ? "bg-foreground text-background" : "text-muted hover:text-foreground"
+                    view === v.key ? "bg-primary text-primary-ink" : "text-muted hover:text-foreground"
                   }`}
                 >
                   {v.label}
@@ -564,7 +564,7 @@ function EvidenceView({ project, focus, clearFocus }: { project: ResearchProject
               type="button"
               aria-pressed={stance === s}
               onClick={() => setStance(s)}
-              className={`rounded-full border px-3 py-1 text-sm ${stance === s ? "border-foreground bg-foreground text-background" : "border-line text-muted hover:text-foreground"}`}
+              className={`rounded-full border px-3 py-1 text-sm ${stance === s ? "border-primary bg-primary text-primary-ink" : "border-line text-muted hover:text-foreground"}`}
             >
               {s === "all" ? "All" : s === "supports" ? "For" : s === "challenges" ? "Against" : "Neutral"} · {count(s)}
             </button>

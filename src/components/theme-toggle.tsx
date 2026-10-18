@@ -28,7 +28,7 @@ function subscribe(onChange: () => void) {
   };
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ className = "text-muted hover:bg-surface hover:text-foreground" }: { className?: string }) {
   // null on the server: the icon appears once the real theme is known, so it never mismatches.
   const theme = useSyncExternalStore(subscribe, current, () => null);
 
@@ -49,7 +49,7 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label={label}
       title={label}
-      className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-surface hover:text-foreground"
+      className={`grid h-9 w-9 place-items-center rounded-full transition ${className}`}
     >
       {theme === "dark" ? <SunIcon /> : theme === "light" ? <MoonIcon /> : <span className="h-4 w-4" />}
     </button>

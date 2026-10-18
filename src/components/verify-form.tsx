@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Eyebrow } from "./app-shell";
 import type { VerifyResult } from "@/lib/arkiv/runs";
 
 /**
@@ -42,15 +43,16 @@ export function VerifyForm({ initialRun = "" }: { initialRun?: string }) {
 
   return (
     <>
-      <main className="mx-auto w-full max-w-3xl px-5 pt-8 pb-28 sm:pt-12">
-        <h1 className="text-2xl font-semibold tracking-tight">Verify a brief</h1>
+      <main className="mx-auto w-full max-w-3xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
+        <Eyebrow>Tamper check</Eyebrow>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Verify a brief</h1>
         <p className="mt-2 text-sm text-muted">
           Checks the brief on Arkiv still hashes to the value recorded when it was published, and, if you give a copy, whether
           that copy matches it word for word.
         </p>
 
         <form
-          className="mt-6 space-y-4"
+          className="mt-6 space-y-4 rounded-2xl border border-line bg-surface p-5"
           onSubmit={(e) => {
             e.preventDefault();
             if (ref.trim()) check();
@@ -61,7 +63,7 @@ export function VerifyForm({ initialRun = "" }: { initialRun?: string }) {
             <input
               value={ref}
               onChange={(e) => setRef(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 font-mono text-sm"
+              className="mt-1 w-full rounded-xl border border-line bg-background px-3 py-2.5 font-mono text-sm focus:border-sage focus:outline-none"
               placeholder="e.g. 3f2c…-… or 0x…"
             />
           </label>
@@ -71,20 +73,20 @@ export function VerifyForm({ initialRun = "" }: { initialRun?: string }) {
               value={copyText}
               onChange={(e) => setCopyText(e.target.value)}
               rows={6}
-              className="mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2 font-mono text-xs"
+              className="mt-1 w-full rounded-xl border border-line bg-background px-3 py-2.5 font-mono text-xs focus:border-sage focus:outline-none"
               placeholder="Paste the downloaded record JSON, or load the file below"
             />
             <input
               type="file"
               accept="application/json,.json"
-              className="mt-2 text-sm"
+              className="mt-2 text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-line file:bg-background file:px-3 file:py-1.5 file:text-sm file:text-foreground"
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (f) setCopyText(await f.text());
               }}
             />
           </label>
-          <button className="rounded-xl bg-foreground px-5 py-2.5 font-medium text-background disabled:opacity-40" disabled={busy || !ref.trim()}>
+          <button className="rounded-xl bg-primary px-5 py-2.5 font-medium text-primary-ink hover:opacity-90 disabled:opacity-40" disabled={busy || !ref.trim()}>
             {busy ? "Checking Arkiv…" : "Verify"}
           </button>
         </form>

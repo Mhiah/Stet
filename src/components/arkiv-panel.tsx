@@ -36,17 +36,21 @@ export function ArkivPanel({ project }: { project: ResearchProject }) {
   if (!a) return null;
 
   return (
-    <section className="rounded-2xl border border-line bg-surface p-5 print:hidden" aria-label="On Arkiv">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-base font-semibold">On Arkiv</h2>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.intact ? "bg-good-soft text-good" : "bg-bad-soft text-bad"}`}>
+    <section className="overflow-hidden rounded-2xl border border-line bg-surface print:hidden" aria-label="On Arkiv">
+      <div className="flex flex-wrap items-center gap-2 bg-brand px-5 py-4 text-brand-ink">
+        <h2 className="mr-1 flex items-center gap-2 text-base font-semibold">
+          <span className="h-2 w-2 rounded-full bg-mint" aria-hidden />
+          On Arkiv
+        </h2>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.intact ? "bg-mint text-brand" : "bg-bad-soft text-bad"}`}>
           {a.intact ? "Hash intact" : "Hash mismatch"}
         </span>
-        {a.readonly && <span className="rounded-full bg-info-soft px-2 py-0.5 text-xs font-medium text-info">Read-only</span>}
-        <span className="rounded-full bg-background px-2 py-0.5 text-xs text-muted">Anyone can extend its life</span>
+        {a.readonly && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium">Read-only</span>}
+        <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-brand-muted">Anyone can extend its life</span>
       </div>
 
-      <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
+      <div className="p-5">
+      <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
         <dt className="text-muted">Entity</dt>
         <dd className="min-w-0 break-all font-mono text-xs">
           <a href={a.explorer_url} target="_blank" rel="noreferrer" className="text-info underline underline-offset-2">
@@ -77,13 +81,13 @@ export function ArkivPanel({ project }: { project: ResearchProject }) {
       </dl>
 
       <div className="mt-4 flex flex-wrap gap-2 text-sm">
-        <a href={`/api/research/${project.id}/record`} className="rounded-lg border border-line px-3 py-1.5 hover:bg-background">
+        <a href={`/api/research/${project.id}/record`} className="rounded-lg border border-line bg-background px-3 py-1.5 hover:border-sage">
           Download record
         </a>
-        <Link href={`/verify?run=${project.id}`} className="rounded-lg border border-line px-3 py-1.5 hover:bg-background">
+        <Link href={`/verify?run=${project.id}`} className="rounded-lg border border-line bg-background px-3 py-1.5 hover:border-sage">
           Verify a copy
         </Link>
-        <Link href={`/?revise=${project.id}`} className="rounded-lg border border-line px-3 py-1.5 hover:bg-background">
+        <Link href={`/?revise=${project.id}`} className="rounded-lg border border-line bg-background px-3 py-1.5 hover:border-sage">
           Re-run as a revision
         </Link>
       </div>
@@ -148,6 +152,7 @@ export function ArkivPanel({ project }: { project: ResearchProject }) {
   --url https://link-to-your-evidence`}
           </pre>
         </details>
+      </div>
       </div>
     </section>
   );

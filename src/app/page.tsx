@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { HomeButton } from "@/components/home-button";
-import { SiteHeader } from "@/components/site-header";
+import { AppShell, Eyebrow } from "@/components/app-shell";
 import { Progress, STAGES, Workstation } from "@/components/workstation";
 import type { PipelineEvent, ResearchProject, Stage } from "@/lib/types";
 
@@ -108,93 +107,113 @@ export default function Home() {
     setSaved(false);
   }
 
-  const header = (
-    <SiteHeader onHome={newQuestion} homeDisabled={running}>
-      {project && !running && (
-        <button type="button" onClick={newQuestion} className="rounded-lg border border-line px-3 py-1.5 text-sm hover:bg-surface">
-          New<span className="max-[359px]:hidden"> question</span>
-        </button>
-      )}
-    </SiteHeader>
+  const newRunButton = project && !running && (
+    <button type="button" onClick={newQuestion} className="rounded-lg border border-line bg-surface px-3 py-1.5 text-sm hover:border-sage">
+      New question
+    </button>
   );
 
-  // Landing: the name, what Stet does, and the question box.
+  // Landing: what Stet does, and the question box.
   if (!running && !project) {
     return (
-      <>
-        {header}
-        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-5 pt-10 pb-24 sm:pt-16">
-          <h1 className="text-center text-4xl font-semibold leading-[1.1] tracking-tight text-balance sm:text-6xl">
-            Research briefs that can&apos;t be quietly rewritten or removed.
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-center text-lg text-muted text-balance">
-            Stet forms a thesis, stress tests it against the evidence, and records the whole brief on Arkiv, where
-            anyone can verify it, keep it alive or challenge it.
-          </p>
-
-          <form
-            className="mt-10 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-2 shadow-sm sm:flex-row"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!tooShort) run();
-            }}
-          >
-            {/* A textarea so a long question wraps on phones instead of being cut off; Enter still submits. */}
-            <textarea
-              rows={1}
-              className="min-w-0 flex-1 resize-none bg-transparent px-3 py-3 text-base leading-snug [field-sizing:content] placeholder:text-muted/60 focus:outline-none max-sm:min-h-[4.5rem]"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onPointerDown={(e) => {
-                if (!question && e.pointerType === "touch" && !tapFilled.current) {
-                  tapFilled.current = true;
-                  setQuestion(DEMO_QUESTION);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (!question && (e.key === "ArrowRight" || e.key === "Tab")) {
-                  e.preventDefault();
-                  setQuestion(DEMO_QUESTION);
-                  return;
-                }
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (!tooShort) run();
-                }
-              }}
-              placeholder={DEMO_QUESTION}
-              aria-label="Your question"
-              maxLength={500}
-            />
-            <button className="rounded-xl bg-foreground px-5 py-3 font-medium text-background transition disabled:opacity-40" disabled={tooShort}>
-              Run and record
-            </button>
-          </form>
-
-          {revising && (
-            <p className="mt-4 rounded-lg bg-info-soft px-3 py-2 text-sm text-info">
-              Re-running as a revision of an earlier run. The earlier run stays on Arkiv exactly as it was; this one is
-              recorded beside it and linked to it.{" "}
-              <button type="button" className="underline underline-offset-2" onClick={() => setRevising(null)}>
-                Make it a new run instead
-              </button>
+      <AppShell onHome={newQuestion}>
+        <main className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-5 py-10 sm:px-10 sm:py-16 lg:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <Eyebrow>Verifiable research · Recorded on Arkiv</Eyebrow>
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
+              Research briefs that can&apos;t be quietly <span className="text-muted/70">rewritten or removed.</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted">
+              Stet forms a thesis, stress tests it against the evidence, and records the whole brief on Arkiv, where
+              anyone can verify it, keep it alive or challenge it.
             </p>
-          )}
-          {error && <p className="mt-4 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
+
+            <form
+              className="mt-8 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-2 shadow-[0_1px_0_rgb(7_11_7/0.04),0_12px_32px_-16px_rgb(7_11_7/0.18)] sm:flex-row"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!tooShort) run();
+              }}
+            >
+              {/* A textarea so a long question wraps on phones instead of being cut off; Enter still submits. */}
+              <textarea
+                rows={1}
+                className="min-w-0 flex-1 resize-none bg-transparent px-3 py-3 text-base leading-snug [field-sizing:content] placeholder:text-muted/60 focus:outline-none max-sm:min-h-[4.5rem]"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onPointerDown={(e) => {
+                  if (!question && e.pointerType === "touch" && !tapFilled.current) {
+                    tapFilled.current = true;
+                    setQuestion(DEMO_QUESTION);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (!question && (e.key === "ArrowRight" || e.key === "Tab")) {
+                    e.preventDefault();
+                    setQuestion(DEMO_QUESTION);
+                    return;
+                  }
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!tooShort) run();
+                  }
+                }}
+                placeholder={DEMO_QUESTION}
+                aria-label="Your question"
+                maxLength={500}
+              />
+              <button
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-medium text-primary-ink transition hover:opacity-90 disabled:opacity-40"
+                disabled={tooShort}
+              >
+                Run and record <span aria-hidden>→</span>
+              </button>
+            </form>
+            <p className="mt-3 text-sm text-muted">
+              Press <kbd className="rounded border border-line bg-surface px-1.5 font-mono text-xs">→</kbd> to try the example question.
+            </p>
+
+            {revising && (
+              <p className="mt-4 rounded-lg bg-info-soft px-3 py-2 text-sm text-info">
+                Re-running as a revision of an earlier run. The earlier run stays on Arkiv exactly as it was; this one is
+                recorded beside it and linked to it.{" "}
+                <button type="button" className="underline underline-offset-2" onClick={() => setRevising(null)}>
+                  Make it a new run instead
+                </button>
+              </p>
+            )}
+            {error && <p className="mt-4 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
+          </div>
+
+          <ExampleCard />
+
+          <ol className="grid gap-3 sm:grid-cols-3 lg:col-span-2">
+            {[
+              ["01", "Stress tested", "A first answer, then the strongest case against it, and every assumption re-judged."],
+              ["02", "Recorded, read-only", "The whole brief goes to Arkiv. Nobody can edit it afterwards, Stet included."],
+              ["03", "Open to challenge", "Anyone can verify a copy, keep the brief alive, or file a counter-claim from their own wallet."],
+            ].map(([n, t, d]) => (
+              <li key={n} className="rounded-2xl border border-line bg-surface p-5">
+                <p className="font-mono text-xs text-sage">{n}</p>
+                <p className="mt-3 font-semibold">{t}</p>
+                <p className="mt-1 text-sm text-muted">{d}</p>
+              </li>
+            ))}
+          </ol>
         </main>
-      </>
+      </AppShell>
     );
   }
 
   return (
-    <>
-      {header}
-      <main className="mx-auto w-full max-w-4xl px-5 pt-8 pb-28 sm:pt-12">
-        <h1 className="text-2xl font-semibold leading-snug tracking-tight print:hidden">{question}</h1>
+    <AppShell onHome={running ? undefined : newQuestion} actions={newRunButton}>
+      <main className="mx-auto w-full max-w-4xl px-5 pt-8 pb-28 sm:px-10 sm:pt-10">
+        <Eyebrow>{running ? "Running" : "Research brief"}</Eyebrow>
+        <h1 className="mt-3 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl print:hidden">{question}</h1>
 
         {mode === "mock" && (
           <p className="mt-3 rounded-lg bg-warn-soft px-3 py-2 text-sm text-warn print:hidden">
-            {notice ?? "Mock mode: illustrative fixtures, not real research. No SERV or Tavily calls are made."}
+            {notice ?? "Sample research: illustrative data, not real research on your question. No SERV or Tavily calls are made."}
           </p>
         )}
 
@@ -206,16 +225,19 @@ export default function Home() {
         {error && <p className="mt-4 rounded-lg bg-bad-soft px-3 py-2 text-sm text-bad">{error}</p>}
 
         {project && !running && saved && project.status === "complete" && (
-          <p className="mt-4 text-sm print:hidden">
-            <Link href={`/research/${project.id}`} className="text-info underline underline-offset-2">
+          <Link
+            href={`/research/${project.id}`}
+            className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-line bg-brand px-4 py-3 text-sm text-brand-ink transition hover:bg-brand/90 print:hidden"
+          >
+            <span className="flex items-center gap-2 font-medium">
+              <span className="h-2 w-2 rounded-full bg-mint" aria-hidden />
               {project.arkiv ? "Recorded on Arkiv" : "Saved report"}
-            </Link>{" "}
-            <span className="text-muted">
-              {project.arkiv
-                ? `· entity ${project.arkiv.key.slice(0, 10)}… · read-only, anyone can verify or challenge it`
-                : "(saved locally for development; not on Arkiv)"}
             </span>
-          </p>
+            <span className="min-w-0 truncate font-mono text-xs text-brand-muted">
+              {project.arkiv ? `entity ${project.arkiv.key.slice(0, 18)}…` : "saved locally for development; not on Arkiv"}
+            </span>
+            <span className="ml-auto text-mint">Open the record →</span>
+          </Link>
         )}
         {project && !running && !saved && project.status === "complete" && (
           <p className="mt-4 rounded-lg bg-warn-soft px-3 py-2 text-sm text-warn print:hidden">
@@ -230,7 +252,47 @@ export default function Home() {
           </div>
         )}
       </main>
-      {!running && <HomeButton onHome={newQuestion} />}
-    </>
+    </AppShell>
+  );
+}
+
+/** An illustration of a recorded brief, beside the question box. Labelled as an example. */
+function ExampleCard() {
+  return (
+    <div aria-hidden className="relative hidden lg:block">
+      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-mint-soft" />
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_24px_48px_-24px_rgb(7_11_7/0.25)]">
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Example brief</p>
+          <span className="flex items-center gap-1.5 rounded-full bg-mint-soft px-2 py-0.5 text-xs font-medium text-good">
+            <span className="h-1.5 w-1.5 rounded-full bg-good" /> Hash intact
+          </span>
+        </div>
+        <p className="mt-4 font-semibold leading-snug">Is there demand for AI bookkeeping among small retailers?</p>
+        <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+          <span className="rounded-full bg-warn-soft px-2 py-0.5 text-warn">medium confidence</span>
+          <span className="rounded-full bg-bad-soft px-2 py-0.5 text-bad">thesis weakened</span>
+        </div>
+        <dl className="mt-5 divide-y divide-line rounded-xl border border-line text-sm">
+          {[
+            ["Facts", "16 checked against their sources"],
+            ["Challenges raised", "5, one critical"],
+            ["Entity", "0xb860…72fb"],
+            ["Status", "Read-only on Arkiv"],
+          ].map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between gap-4 px-3 py-2">
+              <dt className="text-muted">{k}</dt>
+              <dd className={k === "Entity" ? "font-mono text-xs" : ""}>{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mt-4 rounded-xl border border-line bg-brand p-3 text-xs text-brand-ink">
+          <p className="flex items-center gap-2 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-mint" /> Challenge filed · independent wallet
+          </p>
+          <p className="mt-1 text-brand-muted">&ldquo;The adoption figure is from 2019, not 2025.&rdquo;</p>
+        </div>
+      </div>
+    </div>
   );
 }
