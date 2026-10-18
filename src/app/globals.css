@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/*
+ * Theme: follows the device setting until someone uses the toggle, which sets
+ * data-theme on <html> (applied before first paint by the script in layout.tsx).
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --surface: #f7f7f6;
+  --muted: #6b6b6b;
+  --line: rgb(0 0 0 / 0.1);
+
+  /* Verdict colours: supported / weakened / contradicted, plus record kinds. */
+  --good: #15803d;
+  --good-soft: #dcfce7;
+  --warn: #a16207;
+  --warn-soft: #fef3c7;
+  --bad: #b91c1c;
+  --bad-soft: #fee2e2;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+  --accent: #6d28d9;
+  --accent-soft: #ede9fe;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --surface: #151515;
+    --muted: #9a9a9a;
+    --line: rgb(255 255 255 / 0.12);
+
+    --good: #4ade80;
+    --good-soft: rgb(74 222 128 / 0.14);
+    --warn: #fbbf24;
+    --warn-soft: rgb(251 191 36 / 0.14);
+    --bad: #f87171;
+    --bad-soft: rgb(248 113 113 / 0.14);
+    --info: #60a5fa;
+    --info-soft: rgb(96 165 250 / 0.14);
+    --accent: #a78bfa;
+    --accent-soft: rgb(167 139 250 / 0.16);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --surface: #151515;
+  --muted: #9a9a9a;
+  --line: rgb(255 255 255 / 0.12);
+
+  --good: #4ade80;
+  --good-soft: rgb(74 222 128 / 0.14);
+  --warn: #fbbf24;
+  --warn-soft: rgb(251 191 36 / 0.14);
+  --bad: #f87171;
+  --bad-soft: rgb(248 113 113 / 0.14);
+  --info: #60a5fa;
+  --info-soft: rgb(96 165 250 / 0.14);
+  --accent: #a78bfa;
+  --accent-soft: rgb(167 139 250 / 0.16);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* PDFs are always light, and keep badge colours (browsers drop backgrounds by default). */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --surface: #f7f7f6;
+    --muted: #5b5b5b;
+    --line: rgb(0 0 0 / 0.14);
+    --good: #15803d;
+    --good-soft: #dcfce7;
+    --warn: #a16207;
+    --warn-soft: #fef3c7;
+    --bad: #b91c1c;
+    --bad-soft: #fee2e2;
+    --info: #1d4ed8;
+    --info-soft: #dbeafe;
+    --accent: #6d28d9;
+    --accent-soft: #ede9fe;
+  }
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  li,
+  section > div {
+    break-inside: avoid;
+  }
+}
