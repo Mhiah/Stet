@@ -29,5 +29,10 @@ export async function GET() {
     arkiv_error: arkivError,
     saves_runs: arkivError ? false : storageAvailable(),
     vercel_env: process.env.VERCEL_ENV ?? null,
+    // Similarly named variables, so a typo, a stray space or an empty value shows up.
+    // Names and lengths only, never values.
+    similar_variables: Object.keys(process.env)
+      .filter((k) => /serv|tavily|arkiv|stet/i.test(k))
+      .map((k) => ({ name: JSON.stringify(k), value_length: process.env[k]?.length ?? 0 })),
   });
 }
